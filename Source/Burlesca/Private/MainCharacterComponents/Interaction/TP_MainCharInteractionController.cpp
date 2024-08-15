@@ -71,7 +71,7 @@ void UTP_MainCharInteractionController::PerformInteractableCheck()
 		else
 		{
 			InteractionController->InteractableNotFound();
-			CurrentInteractable = nullptr;ыыы
+			CurrentInteractable = nullptr;
 		}
 	}
 
