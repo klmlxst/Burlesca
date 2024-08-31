@@ -2,6 +2,8 @@
 
 
 #include "MainCharacterComponents/Interaction/InteractionCaseController.h"
+
+#include "Framework/DependencyInjection/DependencyInjection.h"
 #include "InteractableObjects/Interactable.h"
 #include "HUD/GameplayHUD.h"
 
@@ -27,13 +29,11 @@ void UInteractionCaseController::InteractableFound(AActor* InteractableObject)
 	{
 		case EInteractableObjectActivityState::Active:
 			TargetInteractable->StartFocus();
-			HUD->ShowInteractionWidget();
 			HUD->UpdateInteractionWidget(Info);
 			break;
 		
 		case EInteractableObjectActivityState::SemiActive:
 			TargetInteractable->StartSemiFocus();
-			HUD->ShowInteractionWidget();
 			HUD->UpdateInteractionWidget(Info);
 			break;
 			
@@ -50,14 +50,14 @@ void UInteractionCaseController::InteractableNotFound()
 		if(IsValid(TargetInteractable.GetObject()))
 		{
 			TargetInteractable->EndFocus();
+			HUD->ClearInteractionWidget();
 		}
 	}
 	
-	HUD->HideInteractionWidget();
-	HUD->ClearInteractionWidget();
-	
 	TargetInteractable = nullptr;
 	CurrentInteractable = nullptr;
+
+	bIsHintShowed = false;
 }
 
 void UInteractionCaseController::InteractionCalled()
@@ -68,6 +68,11 @@ void UInteractionCaseController::InteractionCalled()
 		{
 			FInteractableObjectInfo* Info = TargetInteractable->GetInteractableObjectInfo();
 
+			if(Info->bSetOutlineOffOnInteraction)
+			{
+				TargetInteractable->EndFocus();
+			}
+			
 			switch(Info->ActivityState)
 			{
 				case EInteractableObjectActivityState::Active:
@@ -77,11 +82,8 @@ void UInteractionCaseController::InteractionCalled()
 				case EInteractableObjectActivityState::SemiActive:
 					if(!bIsHintShowed)
 					{
+						HUD->ClearInteractionWidget();
 						HUD->ShowHintInInteractionWidget(Info->HintText);
-					}
-					else
-					{
-						HUD->ClearHintInInteractionWidget();
 					}
 					break;
 				

@@ -3,51 +3,86 @@
 
 #include "MainCharacter.h"
 
-#include "EnhancedInputSubsystems.h"
+#include "BurlescaPlayerController.h"
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Framework/DependencyInjection/DependencyInjection.h"
 #include "MainCharacterComponents/Interaction//TP_MainCharInteractionController.h"
+#include "Framework/SignalBus.h"
 #include "MainCharacterComponents/TP_MainCharMovementComponent.h"
+#include "Settings/SettingsContainer.h"
 
 AMainCharacter::AMainCharacter()
 {
 	ComponentsInitialization();
-
-	UE_LOG(DependencyInjection, Log, TEXT("Character constructed"));
 }
 
-void AMainCharacter::BeginPlay() 
+void AMainCharacter::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)
 {
-	Super::BeginPlay();
-
-	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
-	
-	ControllerComponentsSetup();
-}
-
-void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 	check(CameraController);
-	CameraController->SetupInput(PlayerInputComponent);
+	CameraController->SetupInput(EnhancedInputComponent);
 	check(MovementController);
-	MovementController->SetupInput(PlayerInputComponent);
+	MovementController->SetupInput(EnhancedInputComponent);
 	check(InteractionController)
-	InteractionController->SetupInput(PlayerInputComponent);
+	InteractionController->SetupInput(EnhancedInputComponent);
 }
 
-void AMainCharacter::Construct()
+void AMainCharacter::StopAllPlayerServicies()
 {
-	UE_LOG(DependencyInjection, Log, TEXT("Inject nothing"));
+	CameraController->StopService();
+	InteractionController->StopService();
+	MovementController->StopService();
+}
+
+void AMainCharacter::PlayAllPlayerServicies()
+{
+	CameraController->PlayService();
+	InteractionController->PlayService();
+	MovementController->PlayService();
+}
+
+void AMainCharacter::MoveCameraTo(AActor* PositionActor, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter) const
+{
+	if(CameraController)
+	{
+		CameraController->MoveCameraTo(PositionActor, MovementDuration, bIsMovingFromCharacter);
+	}
+}
+
+void AMainCharacter::MoveCameraTo(FVector PositionVector, FRotator RotationVector, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter) const
+{
+	if(CameraController)
+	{
+		CameraController->MoveCameraTo(PositionVector, RotationVector, MovementDuration, bIsMovingFromCharacter);
+	}
+}
+
+void AMainCharacter::ReturnCameraToCharacter(float MovementDuration) const
+{
+	if(CameraController)
+	{
+		CameraController->ReturnCameraToCharacter(MovementDuration);
+	}
+}
+
+void AMainCharacter::Inject(UDependencyContainer* Container)
+{
+	HUD = Container->Resolve<AGameplayHUD>();
+	check(HUD);
+
+	SignalBus = Container->Resolve<USignalBus>();
+	check(SignalBus);
+
+	UInputSettingsContainer* InputSettingsContainer = Container->Resolve<USettingsContainer>()->GetInputSettingsContainer();
+	
+	CameraController->Init(MainCamera, SignalBus, InputSettingsContainer);
+	InteractionController->Init(MainCamera, HUD, SignalBus);
+
+	ABurlescaPlayerController* PlayerController = Container->Resolve<ABurlescaPlayerController>();
+	PlayerController->SetViewTarget(this);
+	MainCamera->Activate();
+
+	SubscribeEvents();
 }
 
 void AMainCharacter::ComponentsInitialization()
@@ -67,11 +102,19 @@ void AMainCharacter::ComponentsInitialization()
 	check(CameraController);
 	check(MovementController);
 	check(InteractionController);
+
+	MobilePhone = CreateDefaultSubobject<UChildActorComponent>(TEXT("Mobile Phone"));
+	MobilePhone->SetupAttachment(RootComponent);
+	check(MobilePhone);
 }
 
-void AMainCharacter::ControllerComponentsSetup()
+void AMainCharacter::SubscribeEvents()
 {
-	CameraController->Init(MainCamera);
-	InteractionController->Init(MainCamera);
-}
+	check(SignalBus);
+	
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraMovedOutFromCharacter.AddDynamic(this, &AMainCharacter::StopAllPlayerServicies);
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraReturnedToCharacter.AddDynamic(this, &AMainCharacter::PlayAllPlayerServicies);
 
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraMovedOutFromCharacter.AddDynamic(this, &AMainCharacter::DeactivateStaticMesh);
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraReturnedToCharacter.AddDynamic(this, &AMainCharacter::ActivateStaticMesh);
+}

@@ -23,10 +23,9 @@ public:
 	AMainCharacter* Owner;
 	
 	void UpdateWidget(const FInteractableObjectInfo* InteractableObjectInfo) const;
-	void ShowHintInInteractionWidget(const FText HintText) const;
-	void ClearHintInInteractionWidget() const;
 	void ClearWIdget();
-	
+	void ShowHintInInteractionWidget(const FText HintText) const;
+
 protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget|Interaction Visualization")
 	UTextBlock* NameText;
@@ -39,6 +38,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget|Interaction Visualization")
 	UImage* LockImage;
+
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget|Interaction Visualization")
+	UImage* BulletImage;
 	
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;

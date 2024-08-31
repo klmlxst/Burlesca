@@ -3,19 +3,49 @@
 
 #include "BurlescaGameModeBase.h"
 
+#include "EngineUtils.h"
+#include "EnhancedInputComponent.h"
+#include "InputSetupable.h"
 #include "Framework/DependencyInjection/DependencyInjection.h"
+#include "Framework/DependencyInjection/Inject.h"
 
 ABurlescaGameModeBase::ABurlescaGameModeBase()
 {
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Blueprints/BP_MainCharacter")); 
-	if (PlayerPawnBPClass.Class != nullptr)
+	DefaultPawnClass = nullptr;
+}
+
+void ABurlescaGameModeBase::StartPlay()
+{
+	Super::StartPlay();
+	
+	ASceneContext* SceneContext = nullptr;
+	
+	for(TActorIterator<ASceneContext> Iterator(GetWorld()); Iterator; ++Iterator)
 	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
-	else
-	{
-		UE_LOG(LogTemp,Warning,TEXT("Searched character blueprints is null ptr"));
+		SceneContext = *Iterator;
 	}
 
-	UE_LOG(DependencyInjection, Warning, TEXT("GameModeConstruction"));
+	if(SceneContext)
+	{
+		SceneContext->InitDiContainer();
+	}	
+
+	SceneContext->StartInstallers();
+	
+	UDependencyContainer* DiContainer = SceneContext->GetDIContainer();
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(DiContainer->Resolve<APlayerController>()->InputComponent);
+	
+	for(TActorIterator<AActor> It(GetWorld()); It; ++It )
+	{
+		if(It->Implements<UInject>())
+		{
+			Cast<IInject>(*It)->Inject(DiContainer);
+		}
+		
+		if(It->Implements<UInputSetupable>())
+		{
+			Cast<IInputSetupable>(*It)->SetupInput(EnhancedInputComponent);
+		}
+	}
 }

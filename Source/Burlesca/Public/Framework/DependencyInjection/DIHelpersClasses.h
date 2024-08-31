@@ -3,12 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DependencyContainer.h"
+#include "DependencyInjection.h"
 #include "DIHelpersClasses.generated.h"
 
 class UToBinder;
 class UFromBinder;
-class UDependencyContainer;
 
 UCLASS()
 class BURLESCA_API UBindInfo : public UObject
@@ -34,9 +33,19 @@ class BURLESCA_API UFromBinder : public UObject
 
 public:
 	UFromBinder();
-	
+
+	/**
+	* @brief Don't use this function.
+	* It`s internal framework function.
+	* Use From...() instead.
+	*/
 	template <typename T>
-	void Init(UDependencyContainer* Container);
+	void Init(UDependencyContainer* Container)
+	{
+		BindInfo = NewObject<UBindInfo>(this);
+		BindInfo->FromBindClass = T::StaticClass();
+		BindInfo->Container = Container;
+	}
 	
 	UToBinder* FromNew() const;
 
@@ -59,8 +68,26 @@ public:
 	UToBinder();
 	void Init(UBindInfo* bindInfo);
 	
+	/**
+ * @brief Use this function to select object of what class must be created.
+ * If you binding interface then your object class must implement this interface.
+ *
+ * @tparam T Created Object Class
+ */
 	template <typename T>
-	void To();
+	void To()
+	{
+		BindInfo->ToBindClass = T::StaticClass();
+		if(BindInfo->FromBindClass->IsChildOf(UInterface::StaticClass()))
+		{
+			if(!BindInfo->ToBindClass->ImplementsInterface(BindInfo->FromBindClass))
+			{
+				UE_LOG(DependencyInjection, Error, TEXT("%s class don`t inplements %s interface"), *BindInfo->ToBindClass->GetName(),*BindInfo->FromBindClass->GetName());
+				return;
+			}
+		}
+		BindInfo->Container->Register(BindInfo->FromBindClass, NewObject<T>(BindInfo->Container));
+	}
 
 private:
 

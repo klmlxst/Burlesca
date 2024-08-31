@@ -17,5 +17,8 @@ public:
 	AInjectionInstaller();
 	
 	virtual void InstallBindings(UDependencyContainer* Container);
-	
+	virtual void Start(UDependencyContainer* Container);
+
+	UPROPERTY(EditInstanceOnly)
+	uint8 InitializationOrder = 10;
 };

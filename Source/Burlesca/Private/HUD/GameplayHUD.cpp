@@ -2,6 +2,8 @@
 
 
 #include "HUD/GameplayHUD.h"
+
+#include "Framework/SignalBus.h"
 #include "HUD/InteractionInfo.h"
 #include "HUD/PauseMenu.h"
 
@@ -9,11 +11,16 @@ AGameplayHUD::AGameplayHUD()
 {
 }
 
+void AGameplayHUD::Inject(UDependencyContainer* Container)
+{
+	SignalBus = Container->Resolve<USignalBus>();
+
+	SubscribeEvents();
+}
+
 void AGameplayHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Warning, TEXT("HUD Initialized"));
 	
 	if(PauseMenuClass)
 	{
@@ -26,11 +33,23 @@ void AGameplayHUD::BeginPlay()
 	{
 		InteractionInfoWidget = CreateWidget<UInteractionInfo>(GetWorld(),InteractionWidgetClass);
 		InteractionInfoWidget->AddToViewport(-1);
-		InteractionInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+		InteractionInfoWidget->ClearWIdget();
+
+		ShowInteractionWidget();
 	}
 
 	check(InteractionInfoWidget);
 	check(PauseMenuWidget);
+}
+
+void AGameplayHUD::SubscribeEvents()
+{
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraReturnedToCharacter.AddDynamic(this, &AGameplayHUD::ShowInteractionWidget);
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraMovedOutFromCharacter.AddDynamic(this, &AGameplayHUD::ClearInteractionWidget);
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraMovedOutFromCharacter.AddDynamic(this, &AGameplayHUD::HideInteractionWidget);
+	
+	SignalBus->GetGlobalGameEventsContainer()->OnGamePaused.AddDynamic(this, &AGameplayHUD::DisplayPauseMenu);
+	SignalBus->GetGlobalGameEventsContainer()->OnGameUnpaused.AddDynamic(this, &AGameplayHUD::HidePauseMenu);
 }
 
 void AGameplayHUD::DisplayPauseMenu()
@@ -51,11 +70,19 @@ void AGameplayHUD::HidePauseMenu()
 	}
 }
 
-void AGameplayHUD::ShowInteractionWidget() const
+void AGameplayHUD::ShowInteractionWidget() 
 {
 	if(InteractionInfoWidget)
 	{
 		InteractionInfoWidget->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void AGameplayHUD::HideInteractionWidget() 
+{
+	if(InteractionInfoWidget)
+	{
+		InteractionInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -67,34 +94,20 @@ void AGameplayHUD::UpdateInteractionWidget(const FInteractableObjectInfo* Intera
 	}
 }
 
-void AGameplayHUD::ShowHintInInteractionWidget(const FText HintText) const
-{
-	if(InteractionInfoWidget)
-	{
-		InteractionInfoWidget->ShowHintInInteractionWidget(HintText);
-	}
-}
-
-void AGameplayHUD::ClearHintInInteractionWidget() const
-{
-	if(InteractionInfoWidget)
-	{
-		InteractionInfoWidget->ClearHintInInteractionWidget();
-	}
-}
-
-void AGameplayHUD::ClearInteractionWidget() const
+void AGameplayHUD::ClearInteractionWidget() 
 {
 	if(InteractionInfoWidget)
 	{
 		InteractionInfoWidget->ClearWIdget();
 	}
+	
+	UE_LOG(LogTemp, Warning, TEXT("Clear widget"));
 }
 
-void AGameplayHUD::HideInteractionWidget() const
+void AGameplayHUD::ShowHintInInteractionWidget(const FText HintText) const
 {
 	if(InteractionInfoWidget)
 	{
-		InteractionInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+		InteractionInfoWidget->ShowHintInInteractionWidget(HintText);
 	}
 }

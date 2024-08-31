@@ -11,39 +11,45 @@ UTP_MainCharMovementComponent::UTP_MainCharMovementComponent()
 	
 }
 
-void UTP_MainCharMovementComponent::SetupInput(UInputComponent* input)
+void UTP_MainCharMovementComponent::SetupInput(UEnhancedInputComponent* input)
 {
-	UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(input);
-	
-	enhancedInputComponent->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &UTP_MainCharMovementComponent::MoveForward);
-	enhancedInputComponent->BindAction(MoveRightAction, ETriggerEvent::Triggered, this, &UTP_MainCharMovementComponent::MoveRight);
-}
-
-void UTP_MainCharMovementComponent::ChangePossesionState(bool targetState)
-{
-		IsPossesedByCutscene = targetState;
-}
-
-void UTP_MainCharMovementComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	Owner = Cast<ACharacter>(GetOwner());
+	Owner = GetOwner();
 	check(Owner);
+	
+	input->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &UTP_MainCharMovementComponent::MoveForward);
+	input->BindAction(MoveRightAction, ETriggerEvent::Triggered, this, &UTP_MainCharMovementComponent::MoveRight);
+}
+
+void UTP_MainCharMovementComponent::PlayService()
+{
+	bIsServiceStoped = false;
+}
+
+void UTP_MainCharMovementComponent::StopService()
+{
+	bIsServiceStoped = true;
 }
 
 void UTP_MainCharMovementComponent::MoveForward(const FInputActionValue& Value)
 {
-	if(!IsPossesedByCutscene)
+	if(!bIsServiceStoped)
 	{
-		Owner->AddMovementInput(Owner->GetActorForwardVector(),Value.Get<float>());
+		FVector ForwardVector = Owner->GetActorForwardVector();
+
+		FVector NewLocation = Owner->GetActorLocation() + ForwardVector * MovementSpeed * Value.Get<float>();
+
+		Owner->SetActorLocation(NewLocation);
 	}
 }
 
 void UTP_MainCharMovementComponent::MoveRight(const FInputActionValue& Value)
 {
-	if(!IsPossesedByCutscene)
+	if(!bIsServiceStoped)
 	{
-		Owner->AddMovementInput(Owner->GetActorRightVector(),Value.Get<float>());	
+		FVector RightVector = Owner->GetActorRightVector();
+
+		FVector NewLocation = Owner->GetActorLocation() + RightVector * MovementSpeed * Value.Get<float>();
+
+		Owner->SetActorLocation(NewLocation);
 	}
 }

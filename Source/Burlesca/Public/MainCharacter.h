@@ -3,9 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputSetupable.h"
+#include "Framework/DependencyInjection/Inject.h"
 #include "GameFramework/Character.h"
+#include "MainCharacterComponents/TP_MainCharacterCameraController.h"
 #include "MainCharacter.generated.h"
 
+class UDependencyContainer;
 class IInteractable;
 class UTP_MainCharInteractionController;
 class UTP_MainCharacterCameraController;
@@ -13,26 +17,30 @@ class UTP_MainCharMovementComponent;
 class UInputMappingContext;
 class UCameraComponent;
 class USkeletalMeshComponent;
-class UInputComponent;
 
 UCLASS()
-class BURLESCA_API AMainCharacter : public ACharacter
+class BURLESCA_API AMainCharacter : public ACharacter, public IInject, public IInputSetupable
 {
 	GENERATED_BODY()
 
 public:
 	AMainCharacter();
 	
-	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
-protected:
-	virtual void BeginPlay() override;
+	virtual void SetupInput(UEnhancedInputComponent* InputComponent) override;
 
-private:
+	UFUNCTION()
+	void StopAllPlayerServicies();
+
+	UFUNCTION()
+	void PlayAllPlayerServicies();
+
+	void MoveCameraTo(AActor* PositionActor, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;
+	void MoveCameraTo(FVector PositionVector, FRotator RotationVector, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;
+	void ReturnCameraToCharacter(float MovementDuration) const;
 	
-	UPROPERTY(EditAnywhere, Category = Input)
-	UInputMappingContext* DefaultMappingContext;
+	virtual void Inject(UDependencyContainer* Container) override;
 	
+protected:	
 	UPROPERTY(EditAnywhere, Category = CameraController)
 	UTP_MainCharacterCameraController* CameraController;
 
@@ -48,10 +56,21 @@ private:
 	UPROPERTY(EditAnywhere, Category = Mesh)
 	USkeletalMeshComponent* ArmsMesh;
 
-	UFUNCTION(meta = (Inject))
-	void Construct();
+	UPROPERTY(EditAnywhere, Category = "ChildActor")
+	UChildActorComponent* MobilePhone;
+	
+	UPROPERTY(VisibleAnywhere, Category = HUD)
+	AGameplayHUD* HUD;
+
+	UPROPERTY()
+	USignalBus* SignalBus;
 	
 	void ComponentsInitialization();
-	void ControllerComponentsSetup();
+	void SubscribeEvents();
 
+	UFUNCTION()
+	void ActivateStaticMesh() { ArmsMesh->SetVisibility(true); }
+	
+	UFUNCTION()
+	void DeactivateStaticMesh() { ArmsMesh->SetVisibility(false); }
 };

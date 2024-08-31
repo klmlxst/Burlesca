@@ -3,36 +3,62 @@
 
 #include "InteractableObjects/DefaultInteractableObject.h"
 
+#include "MainCharacter.h"
+#include "Framework/SignalBus.h"
+#include "Framework/DependencyInjection/DependencyInjection.h"
+
+
 ADefaultInteractableObject::ADefaultInteractableObject()
 {
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	SetRootComponent(StaticMeshComponent);
 }
 
 void ADefaultInteractableObject::StartFocus()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Called focus"));
+	if(InteractableObjectInfo.ActivityState == EInteractableObjectActivityState::Active &&
+		InteractableObjectInfo.InteractionType != EInteractableObjectType::Hidden &&
+		InteractableObjectInfo.InteractionType != EInteractableObjectType::Putdown)
+	{
+		StaticMeshComponent->SetRenderCustomDepth(true);
+		StaticMeshComponent->SetCustomDepthStencilValue(4);
+	}
 
+	if(InteractableObjectInfo.ActivityState == EInteractableObjectActivityState::Active &&
+		InteractableObjectInfo.InteractionType == EInteractableObjectType::Putdown)
+	{
+		StaticMeshComponent->SetRenderCustomDepth(true);
+		StaticMeshComponent->SetCustomDepthStencilValue(5);
+	}
 }
 
 void ADefaultInteractableObject::StartSemiFocus()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Called semi-focus"));
+	if(InteractableObjectInfo.InteractionType != EInteractableObjectType::Hidden)
+	{
+		StaticMeshComponent->SetRenderCustomDepth(true);
+		StaticMeshComponent->SetCustomDepthStencilValue(5);	
+	}
 }
 
 void ADefaultInteractableObject::EndFocus()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Called unfocus"));
+	StaticMeshComponent->SetCustomDepthStencilValue(5);
+	StaticMeshComponent->SetRenderCustomDepth(false);
 }
 
 void ADefaultInteractableObject::Interact()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Called interaction"));
-
+	
 }
 
 FInteractableObjectInfo* ADefaultInteractableObject::GetInteractableObjectInfo() { return &InteractableObjectInfo; }
 
-void ADefaultInteractableObject::BeginPlay()
+void ADefaultInteractableObject::Inject(UDependencyContainer* Container)
 {
-	Super::BeginPlay();
-	
+	MainCharacter = Container->Resolve<AMainCharacter>();
+	SignalBus = Container->Resolve<USignalBus>();
+
+	check(MainCharacter);
+	check(SignalBus);
 }

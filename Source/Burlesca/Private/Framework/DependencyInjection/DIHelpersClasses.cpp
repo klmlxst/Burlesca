@@ -3,6 +3,8 @@
 
 #include "Framework/DependencyInjection/DIHelpersClasses.h"
 
+#include "Framework/DependencyInjection/DependencyContainer.h"
+
 /*----------- Bind Info -----------*/
 
 UBindInfo::UBindInfo(): FromBindClass(nullptr), ToBindClass(nullptr), Container(nullptr)
@@ -24,7 +26,7 @@ UFromBinder::UFromBinder(): BindInfo(nullptr)
  */
 UToBinder* UFromBinder::FromNew() const
 {
-	UToBinder* ToBinder = NewObject<UToBinder>(this->BindInfo->Container);
+	UToBinder* ToBinder = NewObject<UToBinder>();
 	ToBinder->Init(this->BindInfo);
 	return ToBinder;
 }
@@ -40,47 +42,11 @@ void UFromBinder::FromInstance(UObject* Object) const
 }
 
 
-/**
-* @brief Don't use this function.
-* It`s internal framework function.
-* Use From...() instead.
-*/
-template <typename T>
-void UFromBinder::Init(UDependencyContainer* Container)
-{
-	BindInfo = NewObject<UBindInfo>(this);
-	BindInfo->FromBindClass = T::StaticClass;
-	BindInfo->Container = Container;
-}
-
-
 /*----------- To Binder -----------*/
 
 
 UToBinder::UToBinder(): BindInfo(nullptr)
 {
-}
-
-
-/**
- * @brief Use this function to select object of what class must be created.
- * If you binding interface then your object class must implement this interface.
- *
- * @tparam T Created Object Class
- */
-template <typename T>
-void UToBinder::To()
-{
-	BindInfo->ToBindClass = T::StaticClass;
-	if(BindInfo->FromBindClass->IsChildOf(UInterface::StaticClass()))
-	{
-		if(!BindInfo->ToBindClass->ImplementsInterface(BindInfo->FromBindClass))
-		{
-			UE_LOG(DependencyInjection, Error, TEXT("%s class don`t inplements %s interface"), *BindInfo->ToBindClass->GetName(),*BindInfo->FromBindClass->GetName());
-			return;
-		}
-	}
-	BindInfo->Container->Register(BindInfo->FromBindClass, NewObject<T>(BindInfo->Container));
 }
 
 

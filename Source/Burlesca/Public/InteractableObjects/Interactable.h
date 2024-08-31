@@ -10,6 +10,7 @@ UENUM()
 enum class EInteractableObjectType : uint8
 {
 	CommonInteraction UMETA(DisplayName = "Default"),
+	Other UMETA(DisplayName = "Other"),
 	Hidden UMETA(DisplayName = "Hidden"),
 	Pickup UMETA(DisplayName = "Pick Up"),
 	Putdown UMETA(DisplayName = "Put Down")
@@ -39,6 +40,9 @@ struct FInteractableObjectInfo
 
 	UPROPERTY(EditAnywhere)
 	EInteractableObjectActivityState ActivityState;
+
+	UPROPERTY(EditAnywhere, DisplayName = "Off Outline On Interaction")
+	bool bSetOutlineOffOnInteraction;
 	
 	UPROPERTY(EditAnywhere, meta = (ToolTip = "Will not be shown if object is <InActive>"))
 	FText Name;

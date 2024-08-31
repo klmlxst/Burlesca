@@ -10,23 +10,31 @@ ASceneContext::ASceneContext(): DIContainer(nullptr)
 }
 
 void ASceneContext::InitDiContainer()
-{	
+{
+	UE_LOG(DependencyInjection, Error, TEXT("InitDiContainer"));
+	
+	DIContainer = NewObject<UDependencyContainer>(this);
+	check(DIContainer);
+
+	Algo::SortBy(SceneInstallers, &AInjectionInstaller::InitializationOrder);
+	
 	for (AInjectionInstaller* Installer : SceneInstallers)
 	{
 		Installer->InstallBindings(DIContainer);
 	}
 }
 
+void ASceneContext::StartInstallers()
+{
+	for (AInjectionInstaller* Installer : SceneInstallers)
+	{
+		Installer->Start(DIContainer);
+	}
+}
+
 UDependencyContainer* ASceneContext::GetDIContainer() const
 {
 	return DIContainer;
-}
-
-void ASceneContext::PostInitProperties()
-{
-	Super::PostInitProperties();
-
-	InitDiContainer();
 }
 
 //void ASceneContext::PostLoad()

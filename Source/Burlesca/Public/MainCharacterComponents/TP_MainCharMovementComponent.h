@@ -8,8 +8,7 @@
 
 struct FInputActionValue;
 
-class UInputComponent;
-class UInputMappingContext;
+class UEnhancedInputComponent;
 class UInputAction;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -19,16 +18,16 @@ class BURLESCA_API UTP_MainCharMovementComponent : public UActorComponent
 
 public:	
 	UTP_MainCharMovementComponent();
-	void SetupInput(UInputComponent* input);
+	void SetupInput(UEnhancedInputComponent* input);
 
-	void ChangePossesionState(bool targetState);
+	void PlayService();
+	void StopService();
+
+	FORCEINLINE bool IsServiceStoped() const { return bIsServiceStoped; }
 	
 protected:
-	virtual void BeginPlay() override;
-
-private:
 	UPROPERTY()
-	ACharacter* Owner;
+	AActor* Owner;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveForwardAction;
@@ -36,8 +35,14 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveRightAction;
 
+	UPROPERTY(EditDefaultsOnly)
+	float MovementSpeed = 1;
+	
+	UFUNCTION()
 	void MoveForward(const FInputActionValue& Value);
+
+	UFUNCTION()
 	void MoveRight(const FInputActionValue& Value);
 
-	bool IsPossesedByCutscene;
+	bool bIsServiceStoped;
 };
