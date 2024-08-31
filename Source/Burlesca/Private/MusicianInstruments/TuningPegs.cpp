@@ -80,6 +80,21 @@ bool ATuningPegs::IsInCorrectPosition() const
 	return FMath::Abs(CurrentRotation - TargetRotation) <= Tolerance;
 }
 
+bool ATuningPegs::IsTuned() const
+{
+	return bIsTuned;
+}
+
+void ATuningPegs::SetTuned(bool bIsStateTuned)
+{
+	bIsTuned = bIsStateTuned;
+}
+
+
+
+
+
+
 
 
 

@@ -32,8 +32,14 @@ public:
 	void InitializeRotationRange(float Min, float Max);
 	void RandomizeRotation();
 	bool IsInCorrectPosition() const;
+	bool IsTuned() const;
+	void SetTuned(bool bIsStateTuned);
+
 	
 protected:
+	UPROPERTY(EditInstanceOnly)
+	bool bIsTuned = false;
+	
 	UPROPERTY(EditInstanceOnly)
 	float RotationSpeed = 0.0f;	
 
