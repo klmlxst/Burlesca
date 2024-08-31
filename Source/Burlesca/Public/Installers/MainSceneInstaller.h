@@ -58,7 +58,7 @@ public:
 	UPROPERTY()
 	UMobilePhoneController* MobilePhoneController;
 
-	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")
+	UPROPERTY()
 	AMobilePhone* MobilePhone;	
 
 	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")

@@ -9,6 +9,7 @@
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
 #include "MainCharacter.generated.h"
 
+class AMobilePhone;
 class UDependencyContainer;
 class IInteractable;
 class UTP_MainCharInteractionController;
@@ -39,7 +40,8 @@ public:
 	void ReturnCameraToCharacter(float MovementDuration) const;
 	
 	virtual void Inject(UDependencyContainer* Container) override;
-	
+
+	AMobilePhone* GetMobilePhone() const;
 protected:	
 	UPROPERTY(EditAnywhere, Category = CameraController)
 	UTP_MainCharacterCameraController* CameraController;

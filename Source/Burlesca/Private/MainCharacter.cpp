@@ -10,11 +10,35 @@
 #include "MainCharacterComponents/Interaction//TP_MainCharInteractionController.h"
 #include "Framework/SignalBus.h"
 #include "MainCharacterComponents/TP_MainCharMovementComponent.h"
+#include "MobilePhone/MobilePhone.h"
 #include "Settings/SettingsContainer.h"
 
 AMainCharacter::AMainCharacter()
 {
 	ComponentsInitialization();
+}
+
+void AMainCharacter::ComponentsInitialization()
+{
+	MainCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Main Camera"));
+	MainCamera->SetupAttachment(RootComponent);
+	MainCamera->bUsePawnControlRotation = true;
+
+	ArmsMesh = FindComponentByClass<USkeletalMeshComponent>();
+	check(ArmsMesh);
+	ArmsMesh->bCastDynamicShadow = false;
+	ArmsMesh->CastShadow = false;
+
+	CameraController = CreateDefaultSubobject<UTP_MainCharacterCameraController>(TEXT("Camera Movement Controller"));
+	MovementController = CreateDefaultSubobject<UTP_MainCharMovementComponent>(TEXT("Player Movement Controller"));
+	InteractionController = CreateDefaultSubobject<UTP_MainCharInteractionController>(TEXT("Interaction Controller"));
+	check(CameraController);
+	check(MovementController);
+	check(InteractionController);
+
+	MobilePhone = CreateDefaultSubobject<UChildActorComponent>(TEXT("Mobile Phone"));
+	MobilePhone->SetupAttachment(RootComponent);
+	check(MobilePhone);
 }
 
 void AMainCharacter::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)
@@ -85,27 +109,9 @@ void AMainCharacter::Inject(UDependencyContainer* Container)
 	SubscribeEvents();
 }
 
-void AMainCharacter::ComponentsInitialization()
+AMobilePhone* AMainCharacter::GetMobilePhone() const
 {
-	MainCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Main Camera"));
-	MainCamera->SetupAttachment(RootComponent);
-	MainCamera->bUsePawnControlRotation = true;
-
-	ArmsMesh = FindComponentByClass<USkeletalMeshComponent>();
-	check(ArmsMesh);
-	ArmsMesh->bCastDynamicShadow = false;
-	ArmsMesh->CastShadow = false;
-
-	CameraController = CreateDefaultSubobject<UTP_MainCharacterCameraController>(TEXT("Camera Movement Controller"));
-	MovementController = CreateDefaultSubobject<UTP_MainCharMovementComponent>(TEXT("Player Movement Controller"));
-	InteractionController = CreateDefaultSubobject<UTP_MainCharInteractionController>(TEXT("Interaction Controller"));
-	check(CameraController);
-	check(MovementController);
-	check(InteractionController);
-
-	MobilePhone = CreateDefaultSubobject<UChildActorComponent>(TEXT("Mobile Phone"));
-	MobilePhone->SetupAttachment(RootComponent);
-	check(MobilePhone);
+	return Cast<AMobilePhone>(MobilePhone->GetChildActor());
 }
 
 void AMainCharacter::SubscribeEvents()
