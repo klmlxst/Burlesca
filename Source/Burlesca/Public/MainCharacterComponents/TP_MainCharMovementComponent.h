@@ -8,6 +8,7 @@
 
 struct FInputActionValue;
 
+class AMainCharacter;
 class UEnhancedInputComponent;
 class UInputAction;
 
@@ -19,13 +20,42 @@ class BURLESCA_API UTP_MainCharMovementComponent : public UActorComponent
 public:	
 	UTP_MainCharMovementComponent();
 	void SetupInput(UEnhancedInputComponent* input);
-
+	
 	void PlayService();
 	void StopService();
 
 	FORCEINLINE bool IsServiceStoped() const { return bIsServiceStoped; }
+
+	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 protected:
+	uint8 CurrentForwardMovementDirection = 0;
+	uint8 CurrentRightMovementDirection = 0;
+	
+	UFUNCTION()
+	void StartAcceleratingForward(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void StartAcceleratingRight(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void StartDeacceleratingForward();
+
+	UFUNCTION()
+	void StartDeacceleratingRight();
+
+	UFUNCTION()
+	void StartRunning();
+
+	UFUNCTION()
+	void StopRunning();
+	
+	FTimerHandle ChangingForwardMovementSpeedTimer;
+	FTimerHandle ChangingRightMovementSpeedTimer;
+
+	void UpdateForwardVelocity(float DeltaTime);
+	void UpdateRightVelocity(float DeltaTime);
+	
 	UPROPERTY()
 	AActor* Owner;
 	
@@ -35,14 +65,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoveRightAction;
 
-	UPROPERTY(EditDefaultsOnly)
-	float MovementSpeed = 1;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RunAction;
 	
-	UFUNCTION()
-	void MoveForward(const FInputActionValue& Value);
+	float CurrentForwardMovementSpeed = 0;
+	float CurrentRightMovementSpeed = 0;
 
-	UFUNCTION()
-	void MoveRight(const FInputActionValue& Value);
+	UPROPERTY(EditDefaultsOnly, DisplayName = "Max Character Movement Speed", Category = "Movement Settings")
+	float  MaxCharacterMovementSpeed;
+	
+	UPROPERTY(EditDefaultsOnly, DisplayName = "Acceleration Speed", Category = "Movement Settings")
+	float AccelerationChangeSpeed;
 
+	UPROPERTY(EditDefaultsOnly, DisplayName = "Run Speed", Category = "Movement Settings")
+	float RunSpeed;
+	
 	bool bIsServiceStoped;
 };

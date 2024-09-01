@@ -28,7 +28,7 @@ void AMainCharacter::ComponentsInitialization()
 	check(ArmsMesh);
 	ArmsMesh->bCastDynamicShadow = false;
 	ArmsMesh->CastShadow = false;
-
+	
 	CameraController = CreateDefaultSubobject<UTP_MainCharacterCameraController>(TEXT("Camera Movement Controller"));
 	MovementController = CreateDefaultSubobject<UTP_MainCharMovementComponent>(TEXT("Player Movement Controller"));
 	InteractionController = CreateDefaultSubobject<UTP_MainCharInteractionController>(TEXT("Interaction Controller"));
@@ -101,7 +101,7 @@ void AMainCharacter::Inject(UDependencyContainer* Container)
 	
 	CameraController->Init(MainCamera, SignalBus, InputSettingsContainer);
 	InteractionController->Init(MainCamera, HUD, SignalBus);
-
+	
 	ABurlescaPlayerController* PlayerController = Container->Resolve<ABurlescaPlayerController>();
 	PlayerController->SetViewTarget(this);
 	MainCamera->Activate();
