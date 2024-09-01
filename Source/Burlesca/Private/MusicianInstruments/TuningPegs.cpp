@@ -25,9 +25,29 @@ void ATuningPegs::Deselect()
 
 void ATuningPegs::Rotate(ERotationDirection RotationDirection)
 {
-	float NewRotation = CurrentRotation;
+	if(!bIsRotating)
+	{
+		switch(RotationDirection)
+		{
+		case ERotationDirection::Left:
+			bIsRotating = true;
+			GetWorldTimerManager().SetTimer(RotationReload, this, &ATuningPegs::SetIsNotRotating, 0.01f);
+			CurrentRotation -= 0.02f;
+			UpdateRelativeRotationViaCurrentRotationValue();
+			break;
+			
+		case ERotationDirection::Right:
+			bIsRotating = true;
+			GetWorldTimerManager().SetTimer(RotationReload, this, &ATuningPegs::SetIsNotRotating, 0.01f);
+			CurrentRotation += 0.02f;
+			UpdateRelativeRotationViaCurrentRotationValue();
+			break;
+		}
+	}
+	
+	
 
-	switch (RotationDirection) {
+	/*switch (RotationDirection) {
 	case ERotationDirection::Left:
 		NewRotation -= RotationSpeed;
 		break;
@@ -36,10 +56,10 @@ void ATuningPegs::Rotate(ERotationDirection RotationDirection)
 		break;
 	}
 	
-	if (NewRotation >= MinRotate && NewRotation <= MaxRotate) {
+	if (NewRotation >= MinRotation && NewRotation <= MaxRotation) {
 		CurrentRotation = NewRotation;
 		SetActorRelativeRotation(FRotator(0.0f, 0.0f, CurrentRotation));
-	}
+	}*/
 }
 
 void ATuningPegs::SetComplete()
@@ -53,31 +73,15 @@ float ATuningPegs::GetCurrentRotation() const
 	return CurrentRotation;
 }
 
-void ATuningPegs::InitializeRotationRange(float Min, float Max)
+void ATuningPegs::InitializeRotationRange()
 {
-	MinRotate = Min;
-	MaxRotate = Max;
-	Tolerance = 0.4f;  
-	CurrentRotation = 0.0f;
-	
 	if (FMath::RandBool()) {
-		TargetRotation = FMath::RandRange(1.5f, 3.5f);
+		CurrentRotation = FMath::RandRange(1.5f, 3.5f);
 	} else {
-		TargetRotation = FMath::RandRange(6.5f, 8.5f);
+		CurrentRotation = FMath::RandRange(6.5f, 8.5f);
 	}
 
-	RandomizeRotation();
-}
-
-void ATuningPegs::RandomizeRotation()
-{
-	CurrentRotation = FMath::RandRange(MinRotate, MaxRotate);
-	SetActorRelativeRotation(FRotator(0.0f, 0.0f, CurrentRotation));
-}
-
-bool ATuningPegs::IsInCorrectPosition() const
-{
-	return FMath::Abs(CurrentRotation - TargetRotation) <= Tolerance;
+	UpdateRelativeRotationViaCurrentRotationValue();
 }
 
 bool ATuningPegs::IsTuned() const
@@ -85,17 +89,14 @@ bool ATuningPegs::IsTuned() const
 	return bIsTuned;
 }
 
-void ATuningPegs::SetTuned(bool bIsStateTuned)
+void ATuningPegs::BeginPlay()
 {
-	bIsTuned = bIsStateTuned;
+	Super::BeginPlay();
+
+	InitializeRotationRange();
 }
 
-
-
-
-
-
-
-
-
-
+void ATuningPegs::UpdateRelativeRotationViaCurrentRotationValue()
+{
+	SetActorRelativeRotation(FRotator(CurrentRotation * 30, 0.0f, 0.0f));
+}

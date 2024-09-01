@@ -114,70 +114,62 @@ void UGuitarSetupController::SetupInput(UEnhancedInputComponent* EnhancedInputCo
 
 void UGuitarSetupController::SwitchPeg(const FInputActionValue& Value)
 {
-	if (bIsTimerSucceed && !bIsBlocked && TuningPegs.Num() > 0)
+	if (bIsTimerSucceed && TuningPegs.Num() > 0)
 	{
 		if (TuningPegs.Num() < 6)
 		{
 			UE_LOG(LogTemp, Error, TEXT("Not enough tuning pegs"));
 			return;
 		}
-
-		int32 PreviousSelectedPeg = CurrentSelectedTuningPeg;
-		do
+		
+		if (Value.Get<float>() < 0)
 		{
-			if (Value.Get<float>() < 0)
+			if (CurrentSelectedTuningPeg != 0)
 			{
-				if (CurrentSelectedTuningPeg > 0)
-				{
-					CurrentSelectedTuningPeg--;
-				}
-				else
-				{
-					CurrentSelectedTuningPeg = TuningPegs.Num() - 1;
-				}
+				TuningPegs[CurrentSelectedTuningPeg]->Deselect();
+				CurrentSelectedTuningPeg--;
+				TuningPegs[CurrentSelectedTuningPeg]->Select();
 			}
-			else if (Value.Get<float>() > 0)
+			else
 			{
-				if (CurrentSelectedTuningPeg < TuningPegs.Num() - 1)
-				{
-					CurrentSelectedTuningPeg++;
-				}
-				else
-				{
-					CurrentSelectedTuningPeg = 0;
-				}
+				CurrentSelectedTuningPeg = TuningPegs.Num() - 1;
 			}
-		} while (CurrentSelectedTuningPeg != PreviousSelectedPeg && TuningPegs[CurrentSelectedTuningPeg]->IsTuned());
-
-		if (CurrentSelectedTuningPeg != PreviousSelectedPeg)
+		}
+		else if (Value.Get<float>() > 0)
 		{
-			TuningPegs[PreviousSelectedPeg]->Deselect();
-			TuningPegs[CurrentSelectedTuningPeg]->Select();
+			if (CurrentSelectedTuningPeg < TuningPegs.Num() - 1)
+			{
+				CurrentSelectedTuningPeg++;
+			}
+			else
+			{
+				CurrentSelectedTuningPeg = 0;
+			}
 		}
 	}
 }
 
 
 void UGuitarSetupController::RotatePeg(const FInputActionValue& Value)
-{
-	ATuningPegs* SelectedPeg = TuningPegs[CurrentSelectedTuningPeg];
-    if (bIsGuitarSetsUp && !bIsBlocked && TuningPegs.Num() > 0)
+{	
+    /*if (bIsGuitarSetsUp && !bIsBlocked && TuningPegs.Num() > 0)
     {
             float DirectionValue = Value.Get<float>();
 
-            if (FMath::IsNearlyZero(DirectionValue, 0))
+            if (DirectionValue != 0)
             {
                 ERotationDirection RotationDirection = DirectionValue > 0 ? ERotationDirection::Right : ERotationDirection::Left;
-                SelectedPeg->Rotate(RotationDirection);
+            	
+                TuningPegs[CurrentSelectedTuningPeg]->Rotate(RotationDirection);
 
-                if (SelectedPeg->IsInCorrectPosition() && SelectedPeg->IsTuned())
+                if (TuningPegs[CurrentSelectedTuningPeg]->IsInCorrectPosition() && TuningPegs[CurrentSelectedTuningPeg]->IsTuned())
                 {
-                    SelectedPeg->SetComplete();
+                    TuningPegs[CurrentSelectedTuningPeg]->SetComplete();
                     UE_LOG(LogTemp, Log, TEXT("Peg is in the correct position"));
                 	
                     GetWorld()->GetTimerManager().SetTimer(BlockActionsHandle, this, &UGuitarSetupController::UnblockActions, 0.5f, false);
                     bIsBlocked = true;
-                	SelectedPeg->SetTuned(true);
+                	TuningPegs[CurrentSelectedTuningPeg]->SetTuned(true);
                 	
                     GetWorld()->GetTimerManager().SetTimer(GuitarSetupDelay, this, &UGuitarSetupController::SwitchToNextPeg, 0.5f, false);
                 }
@@ -186,7 +178,7 @@ void UGuitarSetupController::RotatePeg(const FInputActionValue& Value)
                     UE_LOG(LogTemp, Log, TEXT("Peg is not in the correct position"));
                 }
             }
-        }
+        }*/
 }
 
 void UGuitarSetupController::SwitchToNextPeg()
@@ -214,7 +206,7 @@ void UGuitarSetupController::UnblockActions()
 
 void UGuitarSetupController::PlayGuitarString(const FInputActionValue& Value)
 {
-	if (bIsGuitarSetsUp && TuningPegs.Num() > 0)
+	/*if (bIsGuitarSetsUp && TuningPegs.Num() > 0)
 	{
 		if (ATuningPegs* SelectedPeg = TuningPegs[CurrentSelectedTuningPeg])
 		{
@@ -242,7 +234,7 @@ void UGuitarSetupController::PlayGuitarString(const FInputActionValue& Value)
 				UE_LOG(LogTemp, Log, TEXT("String is not tuned. Playing sound with pitch: %f"), CurrentPitch);
 			}
 		}
-	}
+	}*/
 }
 
 
