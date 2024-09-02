@@ -199,7 +199,7 @@ void UGuitarSetupController::SwitchToNextPeg()
 
 void UGuitarSetupController::UnblockActions()
 {
-    bIsBlocked = false;
+    //bIsBlocked = false;
     UE_LOG(LogTemp, Log, TEXT("Actions are unblocked"));
 }
 
