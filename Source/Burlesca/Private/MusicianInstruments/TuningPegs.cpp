@@ -25,41 +25,32 @@ void ATuningPegs::Deselect()
 
 void ATuningPegs::Rotate(ERotationDirection RotationDirection)
 {
-	if(!bIsRotating)
+	if(!bIsRotating && !bIsTuned)
 	{
+		bIsRotating = true;
+		GetWorldTimerManager().SetTimer(RotationReload, this, &ATuningPegs::SetIsNotRotating, 0.01f);
+		
 		switch(RotationDirection)
 		{
-		case ERotationDirection::Left:
-			bIsRotating = true;
-			GetWorldTimerManager().SetTimer(RotationReload, this, &ATuningPegs::SetIsNotRotating, 0.01f);
-			CurrentRotation -= 0.02f;
-			UpdateRelativeRotationViaCurrentRotationValue();
+			case ERotationDirection::Left:
+				if(CurrentRotation - 0.02f > MinRotation)
+					CurrentRotation -= 0.02f;
 			break;
 			
-		case ERotationDirection::Right:
-			bIsRotating = true;
-			GetWorldTimerManager().SetTimer(RotationReload, this, &ATuningPegs::SetIsNotRotating, 0.01f);
-			CurrentRotation += 0.02f;
-			UpdateRelativeRotationViaCurrentRotationValue();
+			case ERotationDirection::Right:
+				if(CurrentRotation + 0.02f < MaxRotation)
+					CurrentRotation += 0.02f;
 			break;
 		}
-	}
-	
-	
 
-	/*switch (RotationDirection) {
-	case ERotationDirection::Left:
-		NewRotation -= RotationSpeed;
-		break;
-	case ERotationDirection::Right:
-		NewRotation += RotationSpeed;
-		break;
+		UpdateRelativeRotationViaCurrentRotationValue();
+
+		if(CurrentRotation >= 4.98f && CurrentRotation <= 5.02f)
+		{
+			bIsTuned = true;
+			SetComplete();
+		}
 	}
-	
-	if (NewRotation >= MinRotation && NewRotation <= MaxRotation) {
-		CurrentRotation = NewRotation;
-		SetActorRelativeRotation(FRotator(0.0f, 0.0f, CurrentRotation));
-	}*/
 }
 
 void ATuningPegs::SetComplete()
@@ -82,11 +73,6 @@ void ATuningPegs::InitializeRotationRange()
 	}
 
 	UpdateRelativeRotationViaCurrentRotationValue();
-}
-
-bool ATuningPegs::IsTuned() const
-{
-	return bIsTuned;
 }
 
 void ATuningPegs::BeginPlay()

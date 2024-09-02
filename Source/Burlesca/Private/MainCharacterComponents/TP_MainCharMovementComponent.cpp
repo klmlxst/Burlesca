@@ -4,7 +4,6 @@
 #include "MainCharacterComponents/TP_MainCharMovementComponent.h"
 
 #include "EnhancedInputComponent.h"
-#include "GameFramework/Character.h"
 
 UTP_MainCharMovementComponent::UTP_MainCharMovementComponent()
 {
@@ -24,6 +23,8 @@ void UTP_MainCharMovementComponent::SetupInput(UEnhancedInputComponent* input)
 
 	input->BindAction(RunAction, ETriggerEvent::Started, this, &UTP_MainCharMovementComponent::StartRunning);
 	input->BindAction(RunAction, ETriggerEvent::Completed, this, &UTP_MainCharMovementComponent::StopRunning);
+
+	
 }
 
 void UTP_MainCharMovementComponent::StartAcceleratingForward(const FInputActionValue& Value)
@@ -197,11 +198,17 @@ void UTP_MainCharMovementComponent::StopService()
 
 void UTP_MainCharMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
-{\
+{
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	check(Owner);
 
+	if(bIsServiceStoped)
+	{
+		CurrentForwardMovementSpeed = 0;
+		CurrentRightMovementSpeed = 0;
+	}
+	
 	UpdateForwardVelocity(DeltaTime);
 	UpdateRightVelocity(DeltaTime);
 	

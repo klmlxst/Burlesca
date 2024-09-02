@@ -26,6 +26,11 @@ void UGuitarSetupController::InitGuitarSetup(AActor* guitarSetupViewPlaceholder,
 	LeftLight = leftLight;
 	RightLight = rightLight;
 	TuningPegs = tuningPegs;
+
+	if(TuningPegs.Num() < 6)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Not enough pegs to properiate work of guitar tuning minigame"));
+	}
 }
 
 
@@ -34,6 +39,14 @@ void UGuitarSetupController::InitInputActions(UInputAction* switchPegAction, UIn
 	SwitchPegAction = switchPegAction;
 	RotatePegAction = rotatePegAction;
 	PlayStringAction = playStringAction;
+}
+
+void UGuitarSetupController::StartGuitarSetup()
+{
+	bIsGuitarSetsUp = true;
+	MainCharacter->MoveCameraTo(GuitarSetupViewPlaceholder, 0.5f, true);
+	GetWorld()->GetTimerManager().SetTimer(GuitarSetupDelay,this, &UGuitarSetupController::OnDelayTimerEnds,
+		0.5f, false);
 }
 
 void UGuitarSetupController::StopGuitarSetup()
@@ -46,20 +59,8 @@ void UGuitarSetupController::StopGuitarSetup()
 
 	for(ATuningPegs* Peg : TuningPegs)
 	{
-		if (!Peg->IsTuned())
-		{
-			Peg->Deselect();
-		}
+		Peg->Deselect();
 	}
-}
-
-
-void UGuitarSetupController::StartGuitarSetup()
-{
-	bIsGuitarSetsUp = true;
-	MainCharacter->MoveCameraTo(GuitarSetupViewPlaceholder, 0.5f, true);
-	GetWorld()->GetTimerManager().SetTimer(GuitarSetupDelay,this, &UGuitarSetupController::OnDelayTimerEnds,
-		0.5f, false);
 }
 
 bool UGuitarSetupController::GetIsGuitarSetsUp() const
@@ -114,71 +115,65 @@ void UGuitarSetupController::SetupInput(UEnhancedInputComponent* EnhancedInputCo
 
 void UGuitarSetupController::SwitchPeg(const FInputActionValue& Value)
 {
-	if (bIsTimerSucceed && TuningPegs.Num() > 0)
+	if (bIsTimerSucceed)
 	{
-		if (TuningPegs.Num() < 6)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Not enough tuning pegs"));
-			return;
-		}
+		TuningPegs[CurrentSelectedTuningPeg]->Deselect();
 		
 		if (Value.Get<float>() < 0)
 		{
 			if (CurrentSelectedTuningPeg != 0)
 			{
-				TuningPegs[CurrentSelectedTuningPeg]->Deselect();
-				CurrentSelectedTuningPeg--;
-				TuningPegs[CurrentSelectedTuningPeg]->Select();
-			}
-			else
-			{
-				CurrentSelectedTuningPeg = TuningPegs.Num() - 1;
+				for(int i = CurrentSelectedTuningPeg - 1; i >= 0; i--)
+				{
+					if(!TuningPegs[i]->GetIsTuned())
+					{
+						CurrentSelectedTuningPeg = i;
+						break;
+					}
+				}
 			}
 		}
+		
 		else if (Value.Get<float>() > 0)
 		{
-			if (CurrentSelectedTuningPeg < TuningPegs.Num() - 1)
+			if (CurrentSelectedTuningPeg != 5)
 			{
-				CurrentSelectedTuningPeg++;
-			}
-			else
-			{
-				CurrentSelectedTuningPeg = 0;
+				for(int i = CurrentSelectedTuningPeg + 1; i <= 5; i++)
+				{
+					if(!TuningPegs[i]->GetIsTuned())
+					{
+						CurrentSelectedTuningPeg = i;
+						break;
+					}
+				}
 			}
 		}
+
+		TuningPegs[CurrentSelectedTuningPeg]->Select();
 	}
 }
 
 
 void UGuitarSetupController::RotatePeg(const FInputActionValue& Value)
 {	
-    /*if (bIsGuitarSetsUp && !bIsBlocked && TuningPegs.Num() > 0)
+    if (bIsGuitarSetsUp)
     {
-            float DirectionValue = Value.Get<float>();
+    	if(Value.Get<float>() != 0)
+    	{
+    		ERotationDirection RotationDirection = Value.Get<float>() > 0 ? ERotationDirection::Right : ERotationDirection::Left;
 
-            if (DirectionValue != 0)
-            {
-                ERotationDirection RotationDirection = DirectionValue > 0 ? ERotationDirection::Right : ERotationDirection::Left;
-            	
-                TuningPegs[CurrentSelectedTuningPeg]->Rotate(RotationDirection);
+    		TuningPegs[CurrentSelectedTuningPeg]->Rotate(RotationDirection);
+    	}
 
-                if (TuningPegs[CurrentSelectedTuningPeg]->IsInCorrectPosition() && TuningPegs[CurrentSelectedTuningPeg]->IsTuned())
-                {
-                    TuningPegs[CurrentSelectedTuningPeg]->SetComplete();
-                    UE_LOG(LogTemp, Log, TEXT("Peg is in the correct position"));
-                	
-                    GetWorld()->GetTimerManager().SetTimer(BlockActionsHandle, this, &UGuitarSetupController::UnblockActions, 0.5f, false);
-                    bIsBlocked = true;
-                	TuningPegs[CurrentSelectedTuningPeg]->SetTuned(true);
-                	
-                    GetWorld()->GetTimerManager().SetTimer(GuitarSetupDelay, this, &UGuitarSetupController::SwitchToNextPeg, 0.5f, false);
-                }
-                else
-                {
-                    UE_LOG(LogTemp, Log, TEXT("Peg is not in the correct position"));
-                }
-            }
-        }*/
+    	if(TuningPegs[CurrentSelectedTuningPeg]->GetIsTuned())
+    	{
+    		if (CurrentSelectedTuningPeg != 5)
+    		{
+    			CurrentSelectedTuningPeg++;
+    			TuningPegs[CurrentSelectedTuningPeg]->Select();
+    		}
+    	}
+    }
 }
 
 void UGuitarSetupController::SwitchToNextPeg()
