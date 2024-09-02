@@ -28,9 +28,9 @@ public:
 	void Rotate(ERotationDirection RotationDirection);
 	void SetComplete();
 	float GetCurrentRotation() const;
+	bool GetIsTuned() const { return bIsTuned; }
 	
 	void InitializeRotationRange();
-	bool IsTuned() const;
 
 	virtual void BeginPlay() override;
 	
@@ -45,7 +45,7 @@ protected:
 	UPROPERTY()
 	FTimerHandle RotationReload;
 	
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY()
 	bool bIsTuned = false;
 	
 	UPROPERTY(EditInstanceOnly)
