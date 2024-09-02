@@ -46,9 +46,13 @@ void UGuitarSetupController::StopGuitarSetup()
 
 	for(ATuningPegs* Peg : TuningPegs)
 	{
-		Peg->Deselect();
+		if (!Peg->IsTuned())
+		{
+			Peg->Deselect();
+		}
 	}
 }
+
 
 void UGuitarSetupController::StartGuitarSetup()
 {
@@ -110,69 +114,62 @@ void UGuitarSetupController::SetupInput(UEnhancedInputComponent* EnhancedInputCo
 
 void UGuitarSetupController::SwitchPeg(const FInputActionValue& Value)
 {
-	if (bIsTimerSucceed)
+	if (bIsTimerSucceed && TuningPegs.Num() > 0)
 	{
 		if (TuningPegs.Num() < 6)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Not enough tunung pegs"));
+			UE_LOG(LogTemp, Error, TEXT("Not enough tuning pegs"));
 			return;
 		}
-
-		bool bActivateNextPeg = false;
 		
-		if(Value.Get<float>() < 0)
+		if (Value.Get<float>() < 0)
 		{
-			bActivateNextPeg = false;
+			if (CurrentSelectedTuningPeg != 0)
+			{
+				TuningPegs[CurrentSelectedTuningPeg]->Deselect();
+				CurrentSelectedTuningPeg--;
+				TuningPegs[CurrentSelectedTuningPeg]->Select();
+			}
+			else
+			{
+				CurrentSelectedTuningPeg = TuningPegs.Num() - 1;
+			}
 		}
-		else if(Value.Get<float>() > 0)
+		else if (Value.Get<float>() > 0)
 		{
-			bActivateNextPeg = true;
-		}
-		
-
-		switch (bActivateNextPeg)
-		{
-			case true:
-				if(CurrentSelectedTuningPeg != 5)
-				{
-					TuningPegs[CurrentSelectedTuningPeg]->Deselect();
-					CurrentSelectedTuningPeg++;
-					TuningPegs[CurrentSelectedTuningPeg]->Select();
-				}
-				break;
-			
-			case false:
-				if(CurrentSelectedTuningPeg != 0)
-				{
-					TuningPegs[CurrentSelectedTuningPeg]->Deselect();
-					CurrentSelectedTuningPeg--;
-					TuningPegs[CurrentSelectedTuningPeg]->Select();
-				}
-				break;
+			if (CurrentSelectedTuningPeg < TuningPegs.Num() - 1)
+			{
+				CurrentSelectedTuningPeg++;
+			}
+			else
+			{
+				CurrentSelectedTuningPeg = 0;
+			}
 		}
 	}
 }
 
+
 void UGuitarSetupController::RotatePeg(const FInputActionValue& Value)
-{
-    if (bIsGuitarSetsUp && !bIsBlocked && TuningPegs.Num() > 0)
+{	
+    /*if (bIsGuitarSetsUp && !bIsBlocked && TuningPegs.Num() > 0)
     {
-        if (ATuningPegs* SelectedPeg = TuningPegs[CurrentSelectedTuningPeg])
-        {
             float DirectionValue = Value.Get<float>();
 
-            if (FMath::Abs(DirectionValue) > KINDA_SMALL_NUMBER)
+            if (DirectionValue != 0)
             {
                 ERotationDirection RotationDirection = DirectionValue > 0 ? ERotationDirection::Right : ERotationDirection::Left;
-                SelectedPeg->Rotate(RotationDirection);
+            	
+                TuningPegs[CurrentSelectedTuningPeg]->Rotate(RotationDirection);
 
-                if (SelectedPeg->IsInCorrectPosition())
+                if (TuningPegs[CurrentSelectedTuningPeg]->IsInCorrectPosition() && TuningPegs[CurrentSelectedTuningPeg]->IsTuned())
                 {
-                    SelectedPeg->SetComplete();
+                    TuningPegs[CurrentSelectedTuningPeg]->SetComplete();
                     UE_LOG(LogTemp, Log, TEXT("Peg is in the correct position"));
                 	
                     GetWorld()->GetTimerManager().SetTimer(BlockActionsHandle, this, &UGuitarSetupController::UnblockActions, 0.5f, false);
                     bIsBlocked = true;
+                	TuningPegs[CurrentSelectedTuningPeg]->SetTuned(true);
                 	
                     GetWorld()->GetTimerManager().SetTimer(GuitarSetupDelay, this, &UGuitarSetupController::SwitchToNextPeg, 0.5f, false);
                 }
@@ -181,8 +178,7 @@ void UGuitarSetupController::RotatePeg(const FInputActionValue& Value)
                     UE_LOG(LogTemp, Log, TEXT("Peg is not in the correct position"));
                 }
             }
-        }
-    }
+        }*/
 }
 
 void UGuitarSetupController::SwitchToNextPeg()
@@ -210,36 +206,35 @@ void UGuitarSetupController::UnblockActions()
 
 void UGuitarSetupController::PlayGuitarString(const FInputActionValue& Value)
 {
-	if (bIsGuitarSetsUp && TuningPegs.Num() > 0)
+	/*if (bIsGuitarSetsUp && TuningPegs.Num() > 0)
 	{
 		if (ATuningPegs* SelectedPeg = TuningPegs[CurrentSelectedTuningPeg])
 		{
-			if (SelectedPeg->IsInCorrectPosition())
+			if (SelectedPeg->IsInCorrectPosition() && SelectedPeg->IsTuned())
 			{
-				// Струна настроена - воспроизведение звука успеха
-				if (AudioComponent && SuccessSound)
+				if (AudioComponent && SuccessSound && SelectedPeg->IsTuned())
 				{
 					AudioComponent->SetSound(SuccessSound);
-					AudioComponent->SetPitchMultiplier(1.0f); // Обычный тон
+					AudioComponent->SetPitchMultiplier(1.0f);
 					AudioComponent->Play();
 				}
 				UE_LOG(LogTemp, Log, TEXT("String is tuned! Playing success sound."));
 			}
 			else
 			{
-				// Струна не настроена - воспроизведение обычного звука струны
+				
 				float CurrentPitch = CalculatePitchFromRotation(SelectedPeg->GetCurrentRotation());
 
 				if (AudioComponent && StringSound)
 				{
 					AudioComponent->SetSound(StringSound);
-					AudioComponent->SetPitchMultiplier(CurrentPitch); // Изменение тона в зависимости от настройки
+					AudioComponent->SetPitchMultiplier(CurrentPitch);
 					AudioComponent->Play();
 				}
 				UE_LOG(LogTemp, Log, TEXT("String is not tuned. Playing sound with pitch: %f"), CurrentPitch);
 			}
 		}
-	}
+	}*/
 }
 
 
