@@ -28,6 +28,12 @@ void UTP_MainCharMovementComponent::SetupInput(UEnhancedInputComponent* input)
 
 void UTP_MainCharMovementComponent::StartAcceleratingForward(const FInputActionValue& Value)
 {
+	if(bIsServiceStoped)
+	{
+		CurrentForwardMovementDirection = 0;
+		return;	
+	}
+	
 	if(Value.Get<float>() == -1)
 	{
 		CurrentForwardMovementDirection = 2;
@@ -40,6 +46,12 @@ void UTP_MainCharMovementComponent::StartAcceleratingForward(const FInputActionV
 
 void UTP_MainCharMovementComponent::StartAcceleratingRight(const FInputActionValue& Value)
 {
+	if(bIsServiceStoped)
+	{
+		CurrentRightMovementDirection = 0;
+		return;	
+	}
+	
 	if(Value.Get<float>() == -1)
 	{
 		CurrentRightMovementDirection = 2;
@@ -185,7 +197,7 @@ void UTP_MainCharMovementComponent::StopService()
 
 void UTP_MainCharMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
-{
+{\
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	check(Owner);
