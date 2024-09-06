@@ -6,10 +6,6 @@
 #include "DIHelpersClasses.h"
 #include "DependencyContainer.generated.h"
 
-BURLESCA_API DECLARE_LOG_CATEGORY_EXTERN(DependencyInjection, All, All);
-
-class UFromBinder;
-
 UCLASS()
 class BURLESCA_API UDependencyContainer : public UObject
 {
@@ -44,7 +40,7 @@ public:
 			return Cast<T>(*FoundInstance);
 		}
 
-		UE_LOG(DependencyInjection, Warning, TEXT("No instance registered for class type %s."), *T::StaticClass()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("No instance registered for class type %s."), *T::StaticClass()->GetName());
 		return nullptr;
 	}
 

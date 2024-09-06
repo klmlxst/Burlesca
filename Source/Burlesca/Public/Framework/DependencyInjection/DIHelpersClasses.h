@@ -3,11 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DependencyInjection.h"
 #include "DIHelpersClasses.generated.h"
 
-class UToBinder;
-class UFromBinder;
+class UDependencyContainer;
 
 UCLASS()
 class BURLESCA_API UBindInfo : public UObject
@@ -75,19 +73,8 @@ public:
  * @tparam T Created Object Class
  */
 	template <typename T>
-	void To()
-	{
-		BindInfo->ToBindClass = T::StaticClass();
-		if(BindInfo->FromBindClass->IsChildOf(UInterface::StaticClass()))
-		{
-			if(!BindInfo->ToBindClass->ImplementsInterface(BindInfo->FromBindClass))
-			{
-				UE_LOG(DependencyInjection, Error, TEXT("%s class don`t inplements %s interface"), *BindInfo->ToBindClass->GetName(),*BindInfo->FromBindClass->GetName());
-				return;
-			}
-		}
-		BindInfo->Container->Register(BindInfo->FromBindClass, NewObject<T>(BindInfo->Container));
-	}
+	void To();
+	
 
 private:
 

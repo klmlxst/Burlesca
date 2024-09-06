@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DependencyInjection/Inject.h"
 #include "UObject/Object.h"
 #include "EscapeButtonController.generated.h"
 
