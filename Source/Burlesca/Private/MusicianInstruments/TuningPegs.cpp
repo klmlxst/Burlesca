@@ -25,20 +25,31 @@ void ATuningPegs::Deselect()
 
 void ATuningPegs::Rotate(ERotationDirection RotationDirection)
 {
-	float NewRotation = CurrentRotation;
+	if(!bIsRotating && !bIsTuned)
+	{
+		bIsRotating = true;
+		GetWorldTimerManager().SetTimer(RotationReload, this, &ATuningPegs::SetIsNotRotating, 0.01f);
+		
+		switch(RotationDirection)
+		{
+			case ERotationDirection::Left:
+				if(CurrentRotation - 0.02f > MinRotation)
+					CurrentRotation -= 0.02f;
+			break;
+			
+			case ERotationDirection::Right:
+				if(CurrentRotation + 0.02f < MaxRotation)
+					CurrentRotation += 0.02f;
+			break;
+		}
 
-	switch (RotationDirection) {
-	case ERotationDirection::Left:
-		NewRotation -= RotationSpeed;
-		break;
-	case ERotationDirection::Right:
-		NewRotation += RotationSpeed;
-		break;
-	}
-	
-	if (NewRotation >= MinRotate && NewRotation <= MaxRotate) {
-		CurrentRotation = NewRotation;
-		SetActorRelativeRotation(FRotator(0.0f, 0.0f, CurrentRotation));
+		UpdateRelativeRotationViaCurrentRotationValue();
+
+		if(CurrentRotation >= 4.98f && CurrentRotation <= 5.02f)
+		{
+			bIsTuned = true;
+			SetComplete();
+		}
 	}
 }
 
@@ -53,34 +64,25 @@ float ATuningPegs::GetCurrentRotation() const
 	return CurrentRotation;
 }
 
-void ATuningPegs::InitializeRotationRange(float Min, float Max)
+void ATuningPegs::InitializeRotationRange()
 {
-	MinRotate = Min;
-	MaxRotate = Max;
-	Tolerance = 0.4f;  
-	CurrentRotation = 0.0f;
-	
 	if (FMath::RandBool()) {
-		TargetRotation = FMath::RandRange(1.5f, 3.5f);
+		CurrentRotation = FMath::RandRange(1.5f, 3.5f);
 	} else {
-		TargetRotation = FMath::RandRange(6.5f, 8.5f);
+		CurrentRotation = FMath::RandRange(6.5f, 8.5f);
 	}
 
-	RandomizeRotation();
+	UpdateRelativeRotationViaCurrentRotationValue();
 }
 
-void ATuningPegs::RandomizeRotation()
+void ATuningPegs::BeginPlay()
 {
-	CurrentRotation = FMath::RandRange(MinRotate, MaxRotate);
-	SetActorRelativeRotation(FRotator(0.0f, 0.0f, CurrentRotation));
+	Super::BeginPlay();
+
+	InitializeRotationRange();
 }
 
-bool ATuningPegs::IsInCorrectPosition() const
+void ATuningPegs::UpdateRelativeRotationViaCurrentRotationValue()
 {
-	return FMath::Abs(CurrentRotation - TargetRotation) <= Tolerance;
+	SetActorRelativeRotation(FRotator(CurrentRotation * 30, 0.0f, 0.0f));
 }
-
-
-
-
-

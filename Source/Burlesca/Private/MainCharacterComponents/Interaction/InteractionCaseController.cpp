@@ -3,7 +3,6 @@
 
 #include "MainCharacterComponents/Interaction/InteractionCaseController.h"
 
-#include "Framework/DependencyInjection/DependencyInjection.h"
 #include "InteractableObjects/Interactable.h"
 #include "HUD/GameplayHUD.h"
 

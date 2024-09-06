@@ -2,8 +2,8 @@
 
 
 #include "Framework/DependencyInjection/DIHelpersClasses.h"
-
 #include "Framework/DependencyInjection/DependencyContainer.h"
+
 
 /*----------- Bind Info -----------*/
 
@@ -58,4 +58,21 @@ UToBinder::UToBinder(): BindInfo(nullptr)
 void UToBinder::Init(UBindInfo* bindInfo)
 {
 	this->BindInfo = bindInfo;
+}
+
+template <typename T>
+void UToBinder::To()
+{
+	{
+		BindInfo->ToBindClass = T::StaticClass();
+		if(BindInfo->FromBindClass->IsChildOf(UInterface::StaticClass()))
+		{
+			if(!BindInfo->ToBindClass->ImplementsInterface(BindInfo->FromBindClass))
+			{
+				UE_LOG(LogTemp, Error, TEXT("%s class don`t inplements %s interface"), *BindInfo->ToBindClass->GetName(),*BindInfo->FromBindClass->GetName());
+				return;
+			}
+		}
+		BindInfo->Container->Register(BindInfo->FromBindClass, NewObject<T>(BindInfo->Container));
+	}
 }

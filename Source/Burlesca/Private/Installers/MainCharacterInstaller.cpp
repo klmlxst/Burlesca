@@ -17,7 +17,7 @@ void AMainCharacterInstaller::InstallBindings(UDependencyContainer* Container)
 {
 	Super::InstallBindings(Container);
 
-	UE_LOG(DependencyInjection, Error, TEXT("Character Installer Install Bindings"));
+	UE_LOG(LogTemp, Error, TEXT("Character Installer Install Bindings"));
 	
 	if (CharacterClass)
 	{

@@ -91,7 +91,6 @@ protected:
 	// Guitar setup state
 	bool bIsGuitarSetsUp = false;
     bool bIsTimerSucceed = false;
-    bool bIsBlocked = false; 
     
 	uint8 CurrentSelectedTuningPeg = 0;
 	

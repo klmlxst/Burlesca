@@ -7,8 +7,10 @@
 #include "Framework/DependencyInjection/Inject.h"
 #include "GameFramework/Character.h"
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
+#include "MainCharacterComponents/TP_MainCharMovementComponent.h"
 #include "MainCharacter.generated.h"
 
+class AMobilePhone;
 class UDependencyContainer;
 class IInteractable;
 class UTP_MainCharInteractionController;
@@ -25,20 +27,26 @@ class BURLESCA_API AMainCharacter : public ACharacter, public IInject, public II
 
 public:
 	AMainCharacter();
-	
 	virtual void SetupInput(UEnhancedInputComponent* InputComponent) override;
-
+	virtual void Inject(UDependencyContainer* Container) override;
+	
 	UFUNCTION()
 	void StopAllPlayerServicies();
 
 	UFUNCTION()
 	void PlayAllPlayerServicies();
 
+	UFUNCTION(BlueprintCallable)
+	float GetCharacterForwardMovementSpeed() const { return MovementController->GetForwardMovementSpeed(); }
+
+	UFUNCTION(BlueprintCallable)
+	float GetCharacterRightMovementSpeed() const { return MovementController->GetRightMovementSpeed(); }
+	
 	void MoveCameraTo(AActor* PositionActor, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;
 	void MoveCameraTo(FVector PositionVector, FRotator RotationVector, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;
 	void ReturnCameraToCharacter(float MovementDuration) const;
-	
-	virtual void Inject(UDependencyContainer* Container) override;
+
+	AMobilePhone* GetMobilePhone() const;
 	
 protected:	
 	UPROPERTY(EditAnywhere, Category = CameraController)

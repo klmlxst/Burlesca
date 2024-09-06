@@ -6,8 +6,8 @@
 #include "EngineUtils.h"
 #include "EnhancedInputComponent.h"
 #include "InputSetupable.h"
-#include "Framework/DependencyInjection/DependencyInjection.h"
 #include "Framework/DependencyInjection/Inject.h"
+#include "Framework/DependencyInjection/SceneContext.h"
 
 ABurlescaGameModeBase::ABurlescaGameModeBase()
 {

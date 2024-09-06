@@ -43,6 +43,8 @@ void AMainSceneInstaller::Start(UDependencyContainer* Container)
 	Super::Start(Container);
 
 	MainCharacter = Container->Resolve<AMainCharacter>();
+	MobilePhone = MainCharacter->GetMobilePhone();
+	check(MobilePhone);
 	
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	check(Subsystem);

@@ -28,31 +28,44 @@ public:
 	void Rotate(ERotationDirection RotationDirection);
 	void SetComplete();
 	float GetCurrentRotation() const;
+	bool GetIsTuned() const { return bIsTuned; }
 	
-	void InitializeRotationRange(float Min, float Max);
-	void RandomizeRotation();
-	bool IsInCorrectPosition() const;
+	void InitializeRotationRange();
+
+	virtual void BeginPlay() override;
 	
 protected:
+
+	UFUNCTION()
+	void SetIsNotRotating() { bIsRotating = false; }
+
+	UFUNCTION()
+	void UpdateRelativeRotationViaCurrentRotationValue();
+	
+	UPROPERTY()
+	FTimerHandle RotationReload;
+	
+	UPROPERTY()
+	bool bIsTuned = false;
+	
 	UPROPERTY(EditInstanceOnly)
 	float RotationSpeed = 0.0f;	
 
-	UPROPERTY(EditInstanceOnly)
-	float CurrentRotation;
+	UPROPERTY()
+	float CurrentRotation = 0.0f;
+
+	UPROPERTY()
+	float TargetRotation = 5.0f;
 
 	UPROPERTY(EditInstanceOnly)
-	float TargetRotation;
+	float MinRotation = 0.0f;
 
 	UPROPERTY(EditInstanceOnly)
-	float MinRotate = 0.0f;
-
-	UPROPERTY(EditInstanceOnly)
-	float MaxRotate = 10.0f;
-
-	UPROPERTY(EditInstanceOnly)
-	float Tolerance;
+	float MaxRotation = 10.0f;
 		
 	UPROPERTY(EditInstanceOnly)
 	UStaticMeshComponent* StaticMeshComponent;
+
+	bool bIsRotating = false;
 	
 };

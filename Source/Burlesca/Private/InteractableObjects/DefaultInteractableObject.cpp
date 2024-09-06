@@ -4,8 +4,8 @@
 #include "InteractableObjects/DefaultInteractableObject.h"
 
 #include "MainCharacter.h"
+#include "Framework/DependencyInjection/DependencyContainer.h"
 #include "Framework/SignalBus.h"
-#include "Framework/DependencyInjection/DependencyInjection.h"
 
 
 ADefaultInteractableObject::ADefaultInteractableObject()
