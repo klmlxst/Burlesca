@@ -118,13 +118,18 @@ void UTP_MainCharacterCameraController::UpdateCameraPosition()
 
 void UTP_MainCharacterCameraController::LookUp(const FInputActionValue& Value)
 {
-	FRotator rotation =  MainCamera->GetRelativeRotation() + FRotator(Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity(), 0.0f, 0.0f);
+	FRotator rotation = MainCamera->GetRelativeRotation();
+	
+	if(MainCamera->GetRelativeRotation().Pitch + Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity() < 90 &&
+		MainCamera->GetRelativeRotation().Pitch + Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity() > -90 )
+	{
+		rotation =  MainCamera->GetRelativeRotation() + FRotator(Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity(), 0.0f, 0.0f);
+	}
 	
 	if(!bIsServiceStoped)
 	{
 		switch(InputSettingsContainer->bIsMouseInvertedY)
 		{
-
 			case true:
 				MainCamera->SetRelativeRotation(rotation * -1);
 				break;
