@@ -13,6 +13,7 @@
 #include "Framework/DependencyInjection/DIHelpersClasses.h"
 #include "MobilePhone/MobilePhoneController.h"
 #include "Settings/SettingsContainer.h"
+#include "MainCharacterAnimInstance.h"
 
 class AMobilePhone;
 
@@ -54,7 +55,7 @@ void AMainSceneInstaller::Start(UDependencyContainer* Container)
 	EscapeButtonController->Init(SignalBus, EscapeButtonPressedAction, MainCharacter, PlayerController);
 	EscapeButtonController->InitServicies(Container->Resolve<UGuitarSetupController>());
 
-	MobilePhoneController->Init(MobilePhone, MainCharacter);
+	MobilePhoneController->Init(MobilePhone, MainCharacter, Container->Resolve<UMainCharacterAnimInstance>());
 	MobilePhoneController->InitInputActions(TakePhoneInOrOutOfHandsAction);
 }
 

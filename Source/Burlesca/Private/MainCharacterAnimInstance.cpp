@@ -38,4 +38,6 @@ void UMainCharacterAnimInstance::Init(USignalBus* signalBus)
 {
 	SignalBus = signalBus;
 	check(SignalBus);
+
+	
 }

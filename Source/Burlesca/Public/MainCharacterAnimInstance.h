@@ -6,6 +6,16 @@
 #include "Animation/AnimInstance.h"
 #include "MainCharacterAnimInstance.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhoneIsInHands);
+
+UENUM(Blueprintable)
+enum class EPhoneAnimationType : uint8
+{
+	PickUpFromPocket,
+	HoldInHands,
+	PutDownInPocket,
+};
+
 class USignalBus;
 class AMainCharacter;
 /**
@@ -21,10 +31,16 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	void Init(USignalBus* signalBus);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayPhoneAnimation(EPhoneAnimationType AnimType);
+
+	UPROPERTY(BlueprintAssignable)
+	FOnPhoneIsInHands OnPhoneIsInHands;
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	AMainCharacter* MainCharacter;
-
+	
 	UPROPERTY()
 	USignalBus* SignalBus;
 	

@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "MobilePhoneController.generated.h"
 
+class UMainCharacterAnimInstance;
 class AMainCharacter;
 class UInputAction;
 class UMobilePhoneScreen;
@@ -36,10 +37,9 @@ class BURLESCA_API UMobilePhoneController : public UObject
 	GENERATED_BODY()
 public:
 	UMobilePhoneController();
-	void Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter);
+	void Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter, UMainCharacterAnimInstance* animInstance);
 	void InitInputActions(UInputAction* TakePhoneInOrOutOfHandsAction);
 	void SetupInput(UEnhancedInputComponent* enhancedInputComponent);
-
 	
 	void PutPhoneInTheWorld(AActor* situationActor);
 	void TakePhoneFromTheWorld();
@@ -50,6 +50,9 @@ protected:
 
 	UPROPERTY()
 	AMainCharacter* MainCharacter;
+
+	UPROPERTY()
+	UMainCharacterAnimInstance* AnimInstance;
 	
 	/*  ---  Input Actions  ---  */
 

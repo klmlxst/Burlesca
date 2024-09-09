@@ -5,6 +5,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "MainCharacter.h"
+#include "MainCharacterAnimInstance.h"
 #include "MobilePhone/MobilePhone.h"
 
 UMobilePhoneController::UMobilePhoneController()
@@ -12,7 +13,7 @@ UMobilePhoneController::UMobilePhoneController()
 	PhoneSituation = EPhoneSituation::InPocket;
 }
 
-void UMobilePhoneController::Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter)
+void UMobilePhoneController::Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter, UMainCharacterAnimInstance* animInstance)
 {
 	MobilePhone = mobilePhone;
 	if(MobilePhone == nullptr)
@@ -24,6 +25,12 @@ void UMobilePhoneController::Init(AMobilePhone* mobilePhone, AMainCharacter* mai
 	if(MainCharacter == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Main character is null in installer"));
+	}
+
+	AnimInstance = animInstance;
+	if(AnimInstance == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Anim instance is null in installer"));
 	}
 }
 
@@ -72,14 +79,12 @@ void UMobilePhoneController::TakePhoneInHands()
 {
 	bCanChangePhoneSituation = true;
 	PhoneSituation = EPhoneSituation::InHands;
-	MobilePhone->SetActorLocation(MobilePhone->GetActorLocation() + FVector(0.0f, 0.0f, 100.0f));
+	AnimInstance->PlayPhoneAnimation(EPhoneAnimationType::PickUpFromPocket);
 }
 
 void UMobilePhoneController::PutPhoneInPocket()
 {
-	bCanChangePhoneSituation = true;
-	PhoneSituation = EPhoneSituation::InPocket;
-	MobilePhone->SetActorLocation(MobilePhone->GetActorLocation() - FVector(0.0f, 0.0f, 100.0f));
+	
 }
 
 void UMobilePhoneController::ChangePhoneFocusState()

@@ -31,11 +31,13 @@ void AMainCharacterInstaller::InstallBindings(UDependencyContainer* Container)
 			SpawnParams.Instigator = GetInstigator();
 
 			MainCharacter = World->SpawnActor<AMainCharacter>(CharacterClass, CharacterSpawnPosition, CharacterSpawnRotation, SpawnParams);
-			Container->Bind<AMainCharacter>()->FromInstance(MainCharacter);
 		}	
 	}
 
 	MainCharacterAnimInstance = MainCharacter->CreateAnimInstance(AnimInstanceClass);
+
+	Container->Bind<AMainCharacter>()->FromInstance(MainCharacter);
+	Container->Bind<UMainCharacterAnimInstance>()->FromInstance(MainCharacterAnimInstance);
 }
 
 void AMainCharacterInstaller::Start(UDependencyContainer* Container)
