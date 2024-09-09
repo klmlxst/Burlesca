@@ -10,6 +10,7 @@
 #include "MainCharacterComponents/TP_MainCharMovementComponent.h"
 #include "MainCharacter.generated.h"
 
+class UMainCharacterAnimInstance;
 class AMobilePhone;
 class UDependencyContainer;
 class IInteractable;
@@ -36,11 +37,14 @@ public:
 	UFUNCTION()
 	void PlayAllPlayerServicies();
 
+	UFUNCTION()
+	UMainCharacterAnimInstance* CreateAnimInstance(UClass* AnimInstanceClass);
+	
 	UFUNCTION(BlueprintCallable)
-	float GetCharacterForwardMovementSpeed() const { return MovementController->GetForwardMovementSpeed(); }
+	float GetForwardMovementSpeedRelativeToMax() const { return MovementController->GetForwardMovementSpeedRelativeToMax(); }
 
 	UFUNCTION(BlueprintCallable)
-	float GetCharacterRightMovementSpeed() const { return MovementController->GetRightMovementSpeed(); }
+	float GetRightMovementSpeedRelativeToMax() const { return MovementController->GetRightMovementSpeedRelativeToMax(); }
 	
 	void MoveCameraTo(AActor* PositionActor, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;
 	void MoveCameraTo(FVector PositionVector, FRotator RotationVector, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;

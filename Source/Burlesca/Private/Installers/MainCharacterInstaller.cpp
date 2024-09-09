@@ -4,6 +4,8 @@
 #include "Installers/MainCharacterInstaller.h"
 
 #include "MainCharacter.h"
+#include "MainCharacterAnimInstance.h"
+#include "Framework/SignalBus.h"
 #include "Framework/DependencyInjection/DependencyContainer.h"
 #include "Framework/DependencyInjection/DIHelpersClasses.h"
 
@@ -32,4 +34,13 @@ void AMainCharacterInstaller::InstallBindings(UDependencyContainer* Container)
 			Container->Bind<AMainCharacter>()->FromInstance(MainCharacter);
 		}	
 	}
+
+	MainCharacterAnimInstance = MainCharacter->CreateAnimInstance(AnimInstanceClass);
+}
+
+void AMainCharacterInstaller::Start(UDependencyContainer* Container)
+{
+	Super::Start(Container);
+
+	MainCharacterAnimInstance->Init(Container->Resolve<USignalBus>());
 }

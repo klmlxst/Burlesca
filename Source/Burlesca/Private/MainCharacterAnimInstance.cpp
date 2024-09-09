@@ -15,4 +15,27 @@ void UMainCharacterAnimInstance::NativeInitializeAnimation()
 void UMainCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	if(MainCharacter == nullptr)
+	{
+		return;
+	}
+
+	CharacterForwardMovingSpeed = MainCharacter->GetForwardMovementSpeedRelativeToMax();
+	CharacterRightMovingSpeed = MainCharacter->GetRightMovementSpeedRelativeToMax();
+
+	if(CharacterForwardMovingSpeed == 0 && CharacterRightMovingSpeed == 0)
+	{
+		bIsCharacterMoving = false;
+	}
+	else
+	{
+		bIsCharacterMoving = true;
+	}
+}
+
+void UMainCharacterAnimInstance::Init(USignalBus* signalBus)
+{
+	SignalBus = signalBus;
+	check(SignalBus);
 }

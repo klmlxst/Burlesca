@@ -4,6 +4,7 @@
 #include "MainCharacter.h"
 
 #include "BurlescaPlayerController.h"
+#include "MainCharacterAnimInstance.h"
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -63,6 +64,12 @@ void AMainCharacter::PlayAllPlayerServicies()
 	CameraController->PlayService();
 	InteractionController->PlayService();
 	MovementController->PlayService();
+}
+
+UMainCharacterAnimInstance* AMainCharacter::CreateAnimInstance(UClass* AnimInstanceClass)
+{
+	ArmsMesh->SetAnimClass(AnimInstanceClass);
+	return Cast<UMainCharacterAnimInstance>(ArmsMesh->GetAnimInstance());
 }
 
 void AMainCharacter::MoveCameraTo(AActor* PositionActor, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter) const

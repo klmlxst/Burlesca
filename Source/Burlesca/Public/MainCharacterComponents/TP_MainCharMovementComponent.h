@@ -26,8 +26,8 @@ public:
 
 	FORCEINLINE bool IsServiceStoped() const { return bIsServiceStoped; }
 
-	float GetForwardMovementSpeed() const { return CurrentForwardMovementSpeed; }
-	float GetRightMovementSpeed() const { return CurrentForwardMovementSpeed; }
+	float GetForwardMovementSpeedRelativeToMax() const { return CurrentForwardMovementSpeed / MaxCharacterMovementSpeed * 100.0f; }
+	float GetRightMovementSpeedRelativeToMax() const { return CurrentForwardMovementSpeed / MaxCharacterMovementSpeed * 100.0f; }
 	
 	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	

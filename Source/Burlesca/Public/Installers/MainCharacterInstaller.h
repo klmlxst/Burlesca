@@ -6,6 +6,7 @@
 #include "Framework/DependencyInjection/InjectionInstaller.h"
 #include "MainCharacterInstaller.generated.h"
 
+class UMainCharacterAnimInstance;
 class AMainCharacter;
 
 UCLASS()
@@ -16,10 +17,16 @@ class BURLESCA_API AMainCharacterInstaller : public AInjectionInstaller
 public:
 	AMainCharacterInstaller();
 	virtual void InstallBindings(UDependencyContainer* Container) override;
-	
+	virtual void Start(UDependencyContainer* Container) override;
 protected:
 	UPROPERTY()
 	AMainCharacter* MainCharacter;
+
+	UPROPERTY()
+	UMainCharacterAnimInstance* MainCharacterAnimInstance;
+
+	UPROPERTY(EditAnywhere, Category = "Character Settings|Animation")
+	TSubclassOf<UAnimInstance> AnimInstanceClass;
 	
 	UPROPERTY(EditAnywhere, Category = "Character Settings")
 	TSubclassOf<ACharacter> CharacterClass;
