@@ -64,12 +64,12 @@ void UMobilePhoneController::ChoosePhoneTakeOrPut()
 		{
 		case EPhoneSituation::InPocket:
 			bCanChangePhoneSituation = false;
-			GetWorld()->GetTimerManager().SetTimer(ChangePhoneSituationTimerHandle, this, &UMobilePhoneController::TakePhoneInHands,0.6f);
+			TakePhoneInHands();
 			break;
 			
 		case EPhoneSituation::InHands:
 			bCanChangePhoneSituation = false;
-			GetWorld()->GetTimerManager().SetTimer(ChangePhoneSituationTimerHandle, this, &UMobilePhoneController::PutPhoneInPocket,0.6f);
+			PutPhoneInPocket();
 			break;
 		}
 	}
@@ -79,12 +79,14 @@ void UMobilePhoneController::TakePhoneInHands()
 {
 	bCanChangePhoneSituation = true;
 	PhoneSituation = EPhoneSituation::InHands;
-	AnimInstance->PlayPhoneAnimation(EPhoneAnimationType::PickUpFromPocket);
+	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PickUpFromPocket);
 }
 
 void UMobilePhoneController::PutPhoneInPocket()
 {
-	
+	bCanChangePhoneSituation = true;
+	PhoneSituation = EPhoneSituation::InPocket;
+	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PutDownInPocket);
 }
 
 void UMobilePhoneController::ChangePhoneFocusState()

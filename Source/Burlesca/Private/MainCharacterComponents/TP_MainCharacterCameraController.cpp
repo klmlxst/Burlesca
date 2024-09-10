@@ -2,7 +2,6 @@
 
 
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
-#include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
@@ -121,7 +120,7 @@ void UTP_MainCharacterCameraController::LookUp(const FInputActionValue& Value)
 	FRotator rotation = MainCamera->GetRelativeRotation();
 	
 	if(MainCamera->GetRelativeRotation().Pitch + Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity() < 90 &&
-		MainCamera->GetRelativeRotation().Pitch + Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity() > -90 )
+		MainCamera->GetRelativeRotation().Pitch + Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity() > -80 )
 	{
 		rotation =  MainCamera->GetRelativeRotation() + FRotator(Value.Get<float>() * InputSettingsContainer->GetMouseSensitivity(), 0.0f, 0.0f);
 	}

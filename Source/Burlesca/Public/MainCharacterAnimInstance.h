@@ -7,10 +7,12 @@
 #include "MainCharacterAnimInstance.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhoneIsInHands);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhoneIsInPocket);
 
 UENUM(Blueprintable)
-enum class EPhoneAnimationType : uint8
+enum class EPhoneAnimation : uint8
 {
+	None,
 	PickUpFromPocket,
 	HoldInHands,
 	PutDownInPocket,
@@ -33,10 +35,13 @@ public:
 	void Init(USignalBus* signalBus);
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void PlayPhoneAnimation(EPhoneAnimationType AnimType);
+	void PlayPhoneAnimation(EPhoneAnimation AnimType);
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintCallable)
 	FOnPhoneIsInHands OnPhoneIsInHands;
+
+	UPROPERTY(BlueprintCallable)
+	FOnPhoneIsInPocket OnPhoneIsInPocket;
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	AMainCharacter* MainCharacter;
@@ -52,4 +57,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bIsCharacterMoving;
+
+	UPROPERTY(BlueprintReadWrite)
+	float RightArmAnimationWeight;
 };
