@@ -5,6 +5,7 @@
 #include <InputSetupable.h>
 
 #include "CoreMinimal.h"
+#include "Components/AudioComponent.h"
 #include "Framework/DependencyInjection/InjectionInstaller.h"
 #include "MusicianInstrumentInstaller.generated.h"
 
@@ -48,4 +49,14 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Setup|Guitar Setup")
 	APointLight* RightLight;
+
+	UPROPERTY(EditAnywhere, Category = "Setup|Guitar Setup|Audio")
+	UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere, Category = "Setup|Guitar Setup|Audio")
+	USoundBase* SuccessSound;
+	
+	UPROPERTY(EditAnywhere, Category = "Setup|Guitar Setup|Audio")
+	TArray<USoundBase*> StringSounds;
+	
 };

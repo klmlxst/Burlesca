@@ -32,6 +32,8 @@ void UMobilePhoneController::Init(AMobilePhone* mobilePhone, AMainCharacter* mai
 	{
 		UE_LOG(LogTemp, Error, TEXT("Anim instance is null in installer"));
 	}
+
+	AnimInstance->OnPhoneIsInHands.AddDynamic(this, &UMobilePhoneController::PowerPhoneOn);
 }
 
 void UMobilePhoneController::InitInputActions(UInputAction* takePhoneInOrOutOfHandsAction)
@@ -86,6 +88,7 @@ void UMobilePhoneController::PutPhoneInPocket()
 {
 	bCanChangePhoneSituation = true;
 	PhoneSituation = EPhoneSituation::InPocket;
+	MobilePhone->SetPowerState(false);
 	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PutDownInPocket);
 }
 

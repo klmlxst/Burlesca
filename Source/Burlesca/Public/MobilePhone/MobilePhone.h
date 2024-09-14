@@ -18,6 +18,9 @@ class BURLESCA_API AMobilePhone : public AActor
 
 public:
 	AMobilePhone();
+
+	UFUNCTION()
+	void SetPowerState(bool bPowerOn);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -33,8 +36,5 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* StaticMesh;
-
-	UPROPERTY(VisibleAnywhere)
-	UMobilePhoneController* MobilePhoneController;
 	
 };

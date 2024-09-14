@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MobilePhone.h"
 #include "UObject/Object.h"
 #include "MobilePhoneController.generated.h"
 
@@ -73,6 +74,9 @@ protected:
 	UFUNCTION()
 	void ChangePhoneFocusState();
 
+	UFUNCTION()
+	void PowerPhoneOn() { MobilePhone->SetPowerState(true); }
+	
 	/*  --- Variables  ---  */
 	
 	bool bIsPhoneFocused = false;

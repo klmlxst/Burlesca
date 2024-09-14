@@ -29,8 +29,16 @@ void UGuitarSetupController::InitGuitarSetup(AActor* guitarSetupViewPlaceholder,
 
 	if(TuningPegs.Num() < 6)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Not enough pegs to properiate work of guitar tuning minigame"));
+		UE_LOG(LogTemp, Error, TEXT("Not enough pegs to apropriate work of guitar tuning minigame"));
 	}
+}
+
+void UGuitarSetupController::InitAudio(UAudioComponent* audioSource, USoundBase* successSound,
+	TArray<USoundBase*> stringSounds)
+{
+	AudioSource = audioSource;
+	SuccessSound = successSound;
+	StringSound = stringSounds;
 }
 
 
@@ -70,17 +78,7 @@ bool UGuitarSetupController::GetIsGuitarSetsUp() const
 
 float UGuitarSetupController::CalculatePitchFromRotation(float RotationValue) const
 {
-	float MinRotation = 0.0f;
-	float MaxRotation = 10.0f;
-	
-	float MinPitchMultiplier = 0.5f;
-	float MaxPitchMultiplier = 2.0f;
-	
-	float NormalizedRotation = FMath::Clamp((RotationValue - MinRotation) / (MaxRotation - MinRotation), 0.0f, 1.0f);
-	
-	float PitchMultiplier = FMath::Lerp(MinPitchMultiplier, MaxPitchMultiplier, NormalizedRotation);
-
-	return PitchMultiplier;
+	return FMath::Lerp(0.5f, 1.5f, RotationValue / 10);
 }
 
 
@@ -167,40 +165,52 @@ void UGuitarSetupController::RotatePeg(const FInputActionValue& Value)
 
     	if(TuningPegs[CurrentSelectedTuningPeg]->GetIsTuned())
     	{
-    		if (CurrentSelectedTuningPeg != 5)
+    		uint8 tunnedQuantity = 0;
+    		for(ATuningPegs* Peg : TuningPegs)
     		{
-    			CurrentSelectedTuningPeg++;
-    			TuningPegs[CurrentSelectedTuningPeg]->Select();
+    			if(Peg->GetIsTuned())
+    			{
+    				tunnedQuantity++;
+    			}
+    		}
+    		if(tunnedQuantity == 6)
+    		{
+    			StopGuitarSetup();
+    		}
+
+    		for(int i = CurrentSelectedTuningPeg + 1; i <= 5; i++)
+    		{
+    			if(!TuningPegs[i]->GetIsTuned())
+    			{
+    				CurrentSelectedTuningPeg = i;
+    				TuningPegs[CurrentSelectedTuningPeg]->Select();
+					return;
+    			}
+    		}
+
+    		for(int i = CurrentSelectedTuningPeg - 1; i >= 0; i--)
+    		{
+    			if(!TuningPegs[i]->GetIsTuned())
+    			{
+    				CurrentSelectedTuningPeg = i;
+    				TuningPegs[CurrentSelectedTuningPeg]->Select();
+    				return;
+    			}
     		}
     	}
     }
 }
 
-void UGuitarSetupController::SwitchToNextPeg()
-{
-    if (CurrentSelectedTuningPeg < TuningPegs.Num() - 1)
-    {
-        TuningPegs[CurrentSelectedTuningPeg]->Deselect();
-        CurrentSelectedTuningPeg++;
-        TuningPegs[CurrentSelectedTuningPeg]->Select();
-        UE_LOG(LogTemp, Log, TEXT("Switched to next peg: %d"), CurrentSelectedTuningPeg);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Log, TEXT("All pegs are tuned. Guitar setup is complete."));
-        StopGuitarSetup();
-    }
-}
-
-void UGuitarSetupController::UnblockActions()
-{
-    //bIsBlocked = false;
-    UE_LOG(LogTemp, Log, TEXT("Actions are unblocked"));
-}
-
-
 void UGuitarSetupController::PlayGuitarString(const FInputActionValue& Value)
 {
+	if(bIsGuitarSetsUp)
+	{
+		
+		AudioSource->SetSound(StringSound[CurrentSelectedTuningPeg]);
+		AudioSource->SetPitchMultiplier(CalculatePitchFromRotation(TuningPegs[CurrentSelectedTuningPeg]->GetCurrentRotation()));
+		AudioSource->Play();
+		GetWorld()->GetTimerManager().SetTimer(StringPlayReload, 0.5f, false);
+	}
 	/*if (bIsGuitarSetsUp && TuningPegs.Num() > 0)
 	{
 		if (ATuningPegs* SelectedPeg = TuningPegs[CurrentSelectedTuningPeg])

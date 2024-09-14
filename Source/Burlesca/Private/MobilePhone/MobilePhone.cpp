@@ -15,21 +15,35 @@ AMobilePhone::AMobilePhone()
 	MobilePhoneScreenWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Mobile Screen Widget"));
 	MobilePhoneScreenWidgetComponent->SetupAttachment(RootComponent);
 	MobilePhoneScreenWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
-		
+}
+
+void AMobilePhone::SetPowerState(bool bPowerOn)
+{
+	switch (bPowerOn)
+	{
+	case true:
+		MobilePhoneScreenWidget->SetVisibility(ESlateVisibility::Visible);
+		break;
+
+	case false:
+		MobilePhoneScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+		break;
+	}
 }
 
 void AMobilePhone::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(MobilePhoneScreenWidgetComponent && MobilePhoneScreenClass)
+	check(MobilePhoneScreenClass);
+	check(MobilePhoneScreenWidgetComponent);
+	
+	MobilePhoneScreenWidget = CreateWidget<UMobilePhoneScreen>(GetWorld(), MobilePhoneScreenClass);
+	MobilePhoneScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+	
+	if (MobilePhoneScreenWidget)
 	{
-		MobilePhoneScreenWidget = CreateWidget<UMobilePhoneScreen>(GetWorld(), MobilePhoneScreenClass);
-
-		if(MobilePhoneScreenWidget)
-		{
-			MobilePhoneScreenWidgetComponent->SetWidget(MobilePhoneScreenWidget);
-		}
+		MobilePhoneScreenWidgetComponent->SetWidget(MobilePhoneScreenWidget);
 	}
 }
 

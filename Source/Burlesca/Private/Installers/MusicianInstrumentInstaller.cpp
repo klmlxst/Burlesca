@@ -23,6 +23,7 @@ void AMusicianInstrumentInstaller::InstallBindings(UDependencyContainer* Contain
 
 	GuitarSetupController->Init(Container->Resolve<AMainCharacter>(), Container->Resolve<USignalBus>());
 	GuitarSetupController->InitGuitarSetup(GuitarSetupViewPlaceholder, LeftLight, RightLight, TuningPegs);
+	GuitarSetupController->InitAudio(AudioComponent, SuccessSound, StringSounds);
 	GuitarSetupController->InitInputActions(SwitchPegAction, RotatePegAction, PlayStringAction);
 }
 
