@@ -4,8 +4,9 @@
 #include "MobilePhone/MobilePhone.h"
 
 #include "Components/WidgetComponent.h"
-#include "HUD/MobilePhoneScreen.h"
-#include "MobilePhone/MobilePhoneController.h"
+#include "MobilePhone/MobilePhoneEnums.h"
+#include "MobilePhone/ApplicationWidgets/Chat/ChatScreen.h"
+#include "MobilePhone/ApplicationWidgets/Home/HomeScreen.h"
 
 AMobilePhone::AMobilePhone()
 {
@@ -17,33 +18,75 @@ AMobilePhone::AMobilePhone()
 	MobilePhoneScreenWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 }
 
+void AMobilePhone::SetupInput(UEnhancedInputComponent* Input)
+{
+	WidgetsCreation();
+
+	HomeScreenWidget->SetupInput(Input);
+}
+
 void AMobilePhone::SetPowerState(bool bPowerOn)
 {
 	switch (bPowerOn)
 	{
 	case true:
-		MobilePhoneScreenWidget->SetVisibility(ESlateVisibility::Visible);
+		OpenedPhoneApplication = EPhoneApplication::HomePage;
+		HomeScreenWidget->OpenApplication();
 		break;
 
 	case false:
-		MobilePhoneScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+		HomeScreenWidget->DeactivateApplication();
+		HomeScreenWidget->CloseApplication();
+		ChatScreenWidget->DeactivateApplication();
+		ChatScreenWidget->CloseApplication();
 		break;
 	}
 }
 
-void AMobilePhone::BeginPlay()
+void AMobilePhone::SetVisibility(bool bIsVisible) const
+{
+	StaticMesh->SetVisibility(bIsVisible);
+}
+
+void AMobilePhone::OnPhoneFocused()
+{
+	switch(OpenedPhoneApplication)
+	{
+	case EPhoneApplication::HomePage:
+		HomeScreenWidget->ActivateApplication();
+		break;
+	case EPhoneApplication::Chat:
+		ChatScreenWidget->ActivateApplication();
+		break;
+	}
+}
+
+void AMobilePhone::OnPhoneUnfocused()
+{
+	switch(OpenedPhoneApplication)
+	{
+	case EPhoneApplication::HomePage:
+		HomeScreenWidget->DeactivateApplication();
+		break;
+	case EPhoneApplication::Chat:
+		ChatScreenWidget->DeactivateApplication();
+		break;
+	}
+}
+
+void AMobilePhone::WidgetsCreation()
 {
 	Super::BeginPlay();
 
-	check(MobilePhoneScreenClass);
+	check(HomeScreenWidgetClass);
 	check(MobilePhoneScreenWidgetComponent);
 	
-	MobilePhoneScreenWidget = CreateWidget<UMobilePhoneScreen>(GetWorld(), MobilePhoneScreenClass);
-	MobilePhoneScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+	HomeScreenWidget = CreateWidget<UHomeScreen>(GetWorld(), HomeScreenWidgetClass);
+	HomeScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
-	if (MobilePhoneScreenWidget)
+	if (HomeScreenWidget)
 	{
-		MobilePhoneScreenWidgetComponent->SetWidget(MobilePhoneScreenWidget);
+		MobilePhoneScreenWidgetComponent->SetWidget(HomeScreenWidget);
 	}
 }
 

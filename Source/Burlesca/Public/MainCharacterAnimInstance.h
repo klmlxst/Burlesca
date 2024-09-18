@@ -9,13 +9,19 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhoneIsInHands);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPhoneIsInPocket);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPhoneFocusStateChanged, bool, bIsFocused);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHandIsOutOfFOV);
+
 UENUM(Blueprintable)
 enum class EPhoneAnimation : uint8
 {
 	None,
 	PickUpFromPocket,
-	HoldInHands,
 	PutDownInPocket,
+	Focus,
+	Unfocus,
+	PutPhoneInWorld
 };
 
 class USignalBus;
@@ -42,6 +48,12 @@ public:
 
 	UPROPERTY(BlueprintCallable)
 	FOnPhoneIsInPocket OnPhoneIsInPocket;
+
+	UPROPERTY(BlueprintCallable)
+	FOnPhoneFocusStateChanged OnPhoneFocusStateChanged;
+
+	UPROPERTY(BlueprintCallable)
+	FOnHandIsOutOfFOV OnHandIsOutOfFOV;
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	AMainCharacter* MainCharacter;

@@ -205,41 +205,15 @@ void UGuitarSetupController::PlayGuitarString(const FInputActionValue& Value)
 {
 	if(bIsGuitarSetsUp)
 	{
-		
-		AudioSource->SetSound(StringSound[CurrentSelectedTuningPeg]);
-		AudioSource->SetPitchMultiplier(CalculatePitchFromRotation(TuningPegs[CurrentSelectedTuningPeg]->GetCurrentRotation()));
-		AudioSource->Play();
-		GetWorld()->GetTimerManager().SetTimer(StringPlayReload, 0.5f, false);
-	}
-	/*if (bIsGuitarSetsUp && TuningPegs.Num() > 0)
-	{
-		if (ATuningPegs* SelectedPeg = TuningPegs[CurrentSelectedTuningPeg])
+		if(bIsGuitarPlayStringReloaded)
 		{
-			if (SelectedPeg->IsInCorrectPosition() && SelectedPeg->IsTuned())
-			{
-				if (AudioComponent && SuccessSound && SelectedPeg->IsTuned())
-				{
-					AudioComponent->SetSound(SuccessSound);
-					AudioComponent->SetPitchMultiplier(1.0f);
-					AudioComponent->Play();
-				}
-				UE_LOG(LogTemp, Log, TEXT("String is tuned! Playing success sound."));
-			}
-			else
-			{
-				
-				float CurrentPitch = CalculatePitchFromRotation(SelectedPeg->GetCurrentRotation());
-
-				if (AudioComponent && StringSound)
-				{
-					AudioComponent->SetSound(StringSound);
-					AudioComponent->SetPitchMultiplier(CurrentPitch);
-					AudioComponent->Play();
-				}
-				UE_LOG(LogTemp, Log, TEXT("String is not tuned. Playing sound with pitch: %f"), CurrentPitch);
-			}
+			AudioSource->SetSound(StringSound[CurrentSelectedTuningPeg]);
+			AudioSource->SetPitchMultiplier(CalculatePitchFromRotation(TuningPegs[CurrentSelectedTuningPeg]->GetCurrentRotation()));
+			AudioSource->Play();
+			bIsGuitarPlayStringReloaded = false;
+			GetWorld()->GetTimerManager().SetTimer(StringPlayReload, this, &UGuitarSetupController::OnGuitarPlayStringReloaded, 0.5f, false);
 		}
-	}*/
+	}
 }
 
 

@@ -49,7 +49,8 @@ public:
 protected:
 	bool bIsGuitarSetsUp = false;
     bool bIsTimerSucceed = false;
-    
+	bool bIsGuitarPlayStringReloaded = true;
+	
 	uint8 CurrentSelectedTuningPeg = 0;
 	
 	FTimerHandle GuitarSetupDelay;
@@ -91,7 +92,11 @@ protected:
 	
 	void ChangeLightActivityState(bool bActivitySate) const;
 
+	UFUNCTION()
 	void OnDelayTimerEnds();
+
+	UFUNCTION()
+	void OnGuitarPlayStringReloaded() { bIsGuitarPlayStringReloaded = true; }
 	
 	UFUNCTION()
 	void SwitchPeg(const FInputActionValue& Value);

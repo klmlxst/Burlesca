@@ -3,38 +3,55 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Framework/DependencyInjection/Inject.h"
+#include "InputSetupable.h"
 #include "GameFramework/Actor.h"
 #include "MobilePhone.generated.h"
 
+class UChatScreen;
+enum class EPhoneApplication : uint8;
+class UHomeScreen;
 class UMobilePhoneController;
 class UWidgetComponent;
-class UMobilePhoneScreen;
 
 UCLASS()
-class BURLESCA_API AMobilePhone : public AActor
+class BURLESCA_API AMobilePhone : public AActor, public IInputSetupable
 {
 	GENERATED_BODY()
 
 public:
 	AMobilePhone();
-
+	virtual void SetupInput(UEnhancedInputComponent* Input) override;
+	
 	UFUNCTION()
 	void SetPowerState(bool bPowerOn);
+	void SetVisibility(bool bIsVisible) const;
+	void OnPhoneFocused();
+	void OnPhoneUnfocused();
 	
+	UPROPERTY(EditDefaultsOnly)
+	UStaticMeshComponent* StaticMesh;
+
+	UPROPERTY()
+	EPhoneApplication OpenedPhoneApplication;
 protected:
-	virtual void BeginPlay() override;
+	void WidgetsCreation();
 	
 	UPROPERTY(EditDefaultsOnly)
 	UWidgetComponent* MobilePhoneScreenWidgetComponent;
+	
+	/*  ---  Application Widget Classes  ---  */
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UHomeScreen> HomeScreenWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UMobilePhoneScreen> MobilePhoneScreenClass;
+	TSubclassOf<UChatScreen> ChatScreenWidgetClass;
+
+	/*  ---  Application Widgets  ---  */
+	
+	UPROPERTY(VisibleDefaultsOnly)
+	UHomeScreen* HomeScreenWidget;
 
 	UPROPERTY(VisibleDefaultsOnly)
-	UMobilePhoneScreen* MobilePhoneScreenWidget;
-
-	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* StaticMesh;
-	
+	UChatScreen* ChatScreenWidget;
 };
