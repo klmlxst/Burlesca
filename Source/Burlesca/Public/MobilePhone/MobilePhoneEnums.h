@@ -16,7 +16,8 @@ enum class EPhoneApplication : uint8
 	None,
 	HomePage,
 	GuitarSetup,
-	Chat
+	Chat,
+	Flashlight
 };
 
 UENUM()

@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "MobilePhone.generated.h"
 
+class UGuitarTunerScreen;
+class UFlashlightScreen;
 class UChatScreen;
 enum class EPhoneApplication : uint8;
 class UHomeScreen;
@@ -35,6 +37,9 @@ public:
 	EPhoneApplication OpenedPhoneApplication;
 protected:
 	void WidgetsCreation();
+
+	UFUNCTION()
+	void OpenApplication(EPhoneApplication application);
 	
 	UPROPERTY(EditDefaultsOnly)
 	UWidgetComponent* MobilePhoneScreenWidgetComponent;
@@ -47,6 +52,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UChatScreen> ChatScreenWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UFlashlightScreen> FlashlightWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UGuitarTunerScreen> GuitarTunerWidgetClass;
+
 	/*  ---  Application Widgets  ---  */
 	
 	UPROPERTY(VisibleDefaultsOnly)
@@ -54,4 +65,10 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly)
 	UChatScreen* ChatScreenWidget;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UFlashlightScreen* FlashlightWidget;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UGuitarTunerScreen* GuitarTunerScreenWidget;
 };

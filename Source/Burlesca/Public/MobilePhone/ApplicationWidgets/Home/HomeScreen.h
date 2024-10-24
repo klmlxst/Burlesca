@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "MobilePhone/ApplicationWidgets/PhoneApplication.h"
 #include "HomeScreen.generated.h"
 
 
@@ -20,21 +21,19 @@ struct FInputActionValue;
  * 
  */
 UCLASS()
-class BURLESCA_API UHomeScreen : public UUserWidget
+class BURLESCA_API UHomeScreen : public UPhoneApplication
 {
 	GENERATED_BODY()
 
 public:
 	FOnApplicationOpenCalled OnApplicationOpenCalled;
 
-	void SetupInput(UEnhancedInputComponent* input);
+	void SetupInput(UEnhancedInputComponent* input) override;
 	void NativeConstruct() override;
 	
-	void OpenApplication();
-	void CloseApplication();
-	void ActivateApplication();
-	void DeactivateApplication();
-	
+	void OpenApplication() override;
+	void CloseApplication() override;
+
 protected:
 	UPROPERTY(EditAnywhere)
 	UInputAction* HorizontalChooseAnotherApplicationAction;
@@ -50,10 +49,13 @@ protected:
 	void OnOpenApplicationActionCalled();
 	
 	UPROPERTY(meta=(BindWidget))
-	UApplicationIcon* HomeApplicationIcon;
+	UApplicationIcon* FlashlightApplicationIcon;
 
 	UPROPERTY(meta=(BindWidget))
 	UApplicationIcon* ChatApplicationIcon;
+
+	UPROPERTY(meta=(BindWidget))
+	UApplicationIcon* GuitarSalmonApplicationIcon;
 
 	UPROPERTY()
 	TArray<UApplicationIcon*> ApplicationIcons;

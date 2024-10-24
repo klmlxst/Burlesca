@@ -5,16 +5,17 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "MobilePhone/ApplicationWidgets/PhoneApplication.h"
-#include "ChatScreen.generated.h"
+#include "GuitarTunerScreen.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class BURLESCA_API UChatScreen : public UPhoneApplication
+class BURLESCA_API UGuitarTunerScreen : public UPhoneApplication
 {
 	GENERATED_BODY()
-
+	
 public:
-	virtual void SetupInput(UEnhancedInputComponent* input) override;
+	void SetupInput(UEnhancedInputComponent* input) override;
+	
 };

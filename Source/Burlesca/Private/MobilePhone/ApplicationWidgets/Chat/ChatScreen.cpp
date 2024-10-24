@@ -3,22 +3,7 @@
 
 #include "MobilePhone/ApplicationWidgets/Chat/ChatScreen.h"
 
-void UChatScreen::SetupInput(UEnhancedInputComponent* input)
+auto UChatScreen::SetupInput(UEnhancedInputComponent* input) -> void
 {
-}
-
-void UChatScreen::OpenApplication()
-{
-}
-
-void UChatScreen::CloseApplication()
-{
-}
-
-void UChatScreen::ActivateApplication()
-{
-}
-
-void UChatScreen::DeactivateApplication()
-{
+	Super::SetupInput(input);
 }

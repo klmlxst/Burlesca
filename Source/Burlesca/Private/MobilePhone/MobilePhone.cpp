@@ -6,6 +6,8 @@
 #include "Components/WidgetComponent.h"
 #include "MobilePhone/MobilePhoneEnums.h"
 #include "MobilePhone/ApplicationWidgets/Chat/ChatScreen.h"
+#include "MobilePhone/ApplicationWidgets/Flashlight/FlashlightScreen.h"
+#include "MobilePhone/ApplicationWidgets/GuitarTuner/GuitarTunerScreen.h"
 #include "MobilePhone/ApplicationWidgets/Home/HomeScreen.h"
 
 AMobilePhone::AMobilePhone()
@@ -23,6 +25,9 @@ void AMobilePhone::SetupInput(UEnhancedInputComponent* Input)
 	WidgetsCreation();
 
 	HomeScreenWidget->SetupInput(Input);
+	FlashlightWidget->SetupInput(Input);
+	ChatScreenWidget->SetupInput(Input);
+	GuitarTunerScreenWidget->SetupInput(Input);
 }
 
 void AMobilePhone::SetPowerState(bool bPowerOn)
@@ -46,6 +51,7 @@ void AMobilePhone::SetPowerState(bool bPowerOn)
 void AMobilePhone::SetVisibility(bool bIsVisible) const
 {
 	StaticMesh->SetVisibility(bIsVisible);
+	MobilePhoneScreenWidgetComponent->SetVisibility(bIsVisible);
 }
 
 void AMobilePhone::OnPhoneFocused()
@@ -78,15 +84,55 @@ void AMobilePhone::WidgetsCreation()
 {
 	Super::BeginPlay();
 
-	check(HomeScreenWidgetClass);
 	check(MobilePhoneScreenWidgetComponent);
+
+	check(HomeScreenWidgetClass);
+	check(ChatScreenWidgetClass);
+	check(FlashlightWidgetClass);
+	check(GuitarTunerWidgetClass);
 	
 	HomeScreenWidget = CreateWidget<UHomeScreen>(GetWorld(), HomeScreenWidgetClass);
+	ChatScreenWidget = CreateWidget<UChatScreen>(GetWorld(), ChatScreenWidgetClass);
+	FlashlightWidget = CreateWidget<UFlashlightScreen>(GetWorld(), FlashlightWidgetClass);
+	GuitarTunerScreenWidget = CreateWidget<UGuitarTunerScreen>(GetWorld(), GuitarTunerWidgetClass);
+	
 	HomeScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+	ChatScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
+	FlashlightWidget->SetVisibility(ESlateVisibility::Collapsed);
+	GuitarTunerScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
 	if (HomeScreenWidget)
 	{
 		MobilePhoneScreenWidgetComponent->SetWidget(HomeScreenWidget);
+	}
+
+	HomeScreenWidget->OnApplicationOpenCalled.AddDynamic(this, &AMobilePhone::OpenApplication);
+}
+
+void AMobilePhone::OpenApplication(EPhoneApplication application)
+{
+	HomeScreenWidget->DeactivateApplication();
+	HomeScreenWidget->CloseApplication();
+
+	switch(application)
+	{
+		case EPhoneApplication::Chat:
+			ChatScreenWidget->OpenApplication();
+			ChatScreenWidget->ActivateApplication();
+			MobilePhoneScreenWidgetComponent->SetWidget(ChatScreenWidget);
+			break;
+
+		case EPhoneApplication::Flashlight:
+			FlashlightWidget->OpenApplication();
+			FlashlightWidget->ActivateApplication();
+			MobilePhoneScreenWidgetComponent->SetWidget(FlashlightWidget);
+			break;
+
+		case EPhoneApplication::GuitarSetup:
+			GuitarTunerScreenWidget->OpenApplication();
+			GuitarTunerScreenWidget->ActivateApplication();
+			MobilePhoneScreenWidgetComponent->SetWidget(GuitarTunerScreenWidget);
+			break;
 	}
 }
 

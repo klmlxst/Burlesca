@@ -4,6 +4,7 @@
 #include "MobilePhone/ApplicationWidgets/Home/HomeScreen.h"
 
 #include "EnhancedInputComponent.h"
+#include "MobilePhone/MobilePhoneEnums.h"
 #include "MobilePhone/ApplicationWidgets/Home/ApplicationIcon.h"
 
 void UHomeScreen::SetupInput(UEnhancedInputComponent* input)
@@ -15,32 +16,25 @@ void UHomeScreen::SetupInput(UEnhancedInputComponent* input)
 
 void UHomeScreen::NativeConstruct()
 {
-	ApplicationIcons.Add(HomeApplicationIcon);
+	ApplicationIcons.Add(FlashlightApplicationIcon);
 	ApplicationIcons.Add(ChatApplicationIcon);
+	ApplicationIcons.Add(GuitarSalmonApplicationIcon);
 }
 
 void UHomeScreen::OpenApplication()
 {
-	SetVisibility(ESlateVisibility::Visible);
+	Super::OpenApplication();
+	
 	CurrentSelectedApplicationIcon = 0;
 	ApplicationIcons[CurrentSelectedApplicationIcon]->Select();
 }
 
 void UHomeScreen::CloseApplication()
 {
-	SetVisibility(ESlateVisibility::Collapsed);
+	Super::CloseApplication();
+	
 	ApplicationIcons[CurrentSelectedApplicationIcon]->Deselect();
 	CurrentSelectedApplicationIcon = 0;
-}
-
-void UHomeScreen::ActivateApplication()
-{
-	bIsApplicationActive = true;
-}
-
-void UHomeScreen::DeactivateApplication()
-{
-	bIsApplicationActive = false;
 }
 
 void UHomeScreen::OnHorizontalChooseAnotherApplicationActionCalled(const FInputActionValue& Value)
@@ -85,4 +79,21 @@ void UHomeScreen::OnVerticalChooseAnotherApplicationActionCalled(const FInputAct
 
 void UHomeScreen::OnOpenApplicationActionCalled()
 {
+	if(bIsApplicationActive)
+	{
+		switch(CurrentSelectedApplicationIcon)
+		{
+		case 0:
+			OnApplicationOpenCalled.Broadcast(EPhoneApplication::Flashlight);
+			break;
+		
+		case 1:
+			OnApplicationOpenCalled.Broadcast(EPhoneApplication::Chat);
+			break;
+		
+		case 2:
+			OnApplicationOpenCalled.Broadcast(EPhoneApplication::GuitarSetup);
+			break;
+		}
+	}
 }
