@@ -13,6 +13,8 @@
 #include "Framework/DependencyInjection/DIHelpersClasses.h"
 #include "MobilePhone/MobilePhoneController.h"
 #include "Settings/SettingsContainer.h"
+#include "MainCharacterAnimInstance.h"
+#include "MobilePhone/MobilePhone.h"
 
 class AMobilePhone;
 
@@ -30,11 +32,15 @@ void AMainSceneInstaller::InstallBindings(UDependencyContainer* Container)
 		EscapeButtonController =  NewObject<UEscapeButtonController>(this);
 		SettingsContainer = NewObject<USettingsContainer>(this);
 		MobilePhoneController = NewObject<UMobilePhoneController>(this);
+		MobilePhone->StaticMesh->SetSimulatePhysics(false);
+		MobilePhone->StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		MobilePhone->StaticMesh->CastShadow = false;
 		
 		Container->Bind<USignalBus>()->FromInstance(SignalBus);
 		Container->Bind<UEscapeButtonController>()->FromInstance(EscapeButtonController);
 		Container->Bind<USettingsContainer>()->FromInstance(SettingsContainer);
 		Container->Bind<UMobilePhoneController>()->FromInstance(MobilePhoneController);
+		Container->Bind<AMobilePhone>()->FromInstance(MobilePhone);
 	}
 }
 
@@ -43,8 +49,6 @@ void AMainSceneInstaller::Start(UDependencyContainer* Container)
 	Super::Start(Container);
 
 	MainCharacter = Container->Resolve<AMainCharacter>();
-	MobilePhone = MainCharacter->GetMobilePhone();
-	check(MobilePhone);
 	
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 	check(Subsystem);
@@ -54,8 +58,8 @@ void AMainSceneInstaller::Start(UDependencyContainer* Container)
 	EscapeButtonController->Init(SignalBus, EscapeButtonPressedAction, MainCharacter, PlayerController);
 	EscapeButtonController->InitServicies(Container->Resolve<UGuitarSetupController>());
 
-	MobilePhoneController->Init(MobilePhone, MainCharacter);
-	MobilePhoneController->InitInputActions(TakePhoneInOrOutOfHandsAction);
+	MobilePhoneController->Init(MobilePhone, MainCharacter, Container->Resolve<UMainCharacterAnimInstance>());
+	MobilePhoneController->InitInputActions(TakePhoneInOrOutOfHandsAction, FocusPhoneAction);
 }
 
 void AMainSceneInstaller::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)

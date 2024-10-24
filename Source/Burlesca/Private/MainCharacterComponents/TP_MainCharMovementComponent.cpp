@@ -89,23 +89,32 @@ void UTP_MainCharMovementComponent::StopRunning()
 
 void UTP_MainCharMovementComponent::UpdateForwardVelocity(float DeltaTime)
 {
+	float TickMovementDistance = MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+	
 	switch(CurrentForwardMovementDirection)
 	{
 		case 1:
 			if(CurrentForwardMovementSpeed < MaxCharacterMovementSpeed)
 			{
-				CurrentForwardMovementSpeed += MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				if(CurrentForwardMovementSpeed + TickMovementDistance > MaxCharacterMovementSpeed)
+				{
+					CurrentForwardMovementSpeed = MaxCharacterMovementSpeed;
+				}
+				else
+				{
+					CurrentForwardMovementSpeed += TickMovementDistance;
+				}
 			}
-			else
+			else if(CurrentForwardMovementSpeed > MaxCharacterMovementSpeed)
 			{
-				CurrentForwardMovementSpeed -= MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentForwardMovementSpeed -= TickMovementDistance;
 			}
 		break;
 
 		case 0:
 			if(CurrentForwardMovementSpeed > 0)
 			{
-				CurrentForwardMovementSpeed -= MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentForwardMovementSpeed -= TickMovementDistance;
 				
 				if(CurrentForwardMovementSpeed < 0)
 				{
@@ -114,7 +123,7 @@ void UTP_MainCharMovementComponent::UpdateForwardVelocity(float DeltaTime)
 			}
 			else if(CurrentForwardMovementSpeed < 0)
 			{
-				CurrentForwardMovementSpeed += MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentForwardMovementSpeed += TickMovementDistance;
 				
 				if(CurrentForwardMovementSpeed > 0)
 				{
@@ -124,13 +133,20 @@ void UTP_MainCharMovementComponent::UpdateForwardVelocity(float DeltaTime)
 		break;
 
 		case 2:
-			if(CurrentForwardMovementSpeed > MaxCharacterMovementSpeed * -1)
+			if(CurrentForwardMovementSpeed > -MaxCharacterMovementSpeed)
 			{
-				CurrentForwardMovementSpeed -= MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				if(CurrentForwardMovementSpeed - TickMovementDistance < -MaxCharacterMovementSpeed)
+				{
+					CurrentForwardMovementSpeed = -MaxCharacterMovementSpeed;
+				}
+				else
+				{
+					CurrentForwardMovementSpeed -= TickMovementDistance;
+				}
 			}
-			else
+			else if(CurrentForwardMovementSpeed < -MaxCharacterMovementSpeed)
 			{
-				CurrentForwardMovementSpeed += MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentForwardMovementSpeed += TickMovementDistance;
 			}
 		break;
 			
@@ -139,50 +155,67 @@ void UTP_MainCharMovementComponent::UpdateForwardVelocity(float DeltaTime)
 
 void UTP_MainCharMovementComponent::UpdateRightVelocity(float DeltaTime)
 {
+	float TickMovementDistance = MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+	
 	switch(CurrentRightMovementDirection)
 	{
-		case 1:
-			if(CurrentRightMovementSpeed < MaxCharacterMovementSpeed)
+	case 1:
+		if(CurrentRightMovementSpeed < MaxCharacterMovementSpeed)
+		{
+			if(CurrentRightMovementSpeed + TickMovementDistance > MaxCharacterMovementSpeed)
 			{
-				CurrentRightMovementSpeed += MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentRightMovementSpeed = MaxCharacterMovementSpeed;
 			}
 			else
 			{
-				CurrentRightMovementSpeed -= MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentRightMovementSpeed += TickMovementDistance;
 			}
+		}
+		else if(CurrentRightMovementSpeed > MaxCharacterMovementSpeed)
+		{
+			CurrentRightMovementSpeed -= TickMovementDistance;
+		}
 		break;
 
-		case 0:
+	case 0:
+		if(CurrentRightMovementSpeed > 0)
+		{
+			CurrentRightMovementSpeed -= TickMovementDistance;
+				
+			if(CurrentRightMovementSpeed < 0)
+			{
+				CurrentRightMovementSpeed = 0;
+			}
+		}
+		else if(CurrentRightMovementSpeed < 0)
+		{
+			CurrentRightMovementSpeed += TickMovementDistance;
+				
 			if(CurrentRightMovementSpeed > 0)
 			{
-				CurrentRightMovementSpeed -= MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
-				
-				if(CurrentRightMovementSpeed < 0)
-				{
-					CurrentRightMovementSpeed = 0;
-				}
+				CurrentRightMovementSpeed = 0;
 			}
-			else if(CurrentRightMovementSpeed < 0)
-			{
-				CurrentRightMovementSpeed += MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
-				
-				if(CurrentRightMovementSpeed > 0)
-				{
-					CurrentRightMovementSpeed = 0;
-				}
-			}
+		}
 		break;
 
-		case 2:
-			if(CurrentRightMovementSpeed > MaxCharacterMovementSpeed * -1)
+	case 2:
+		if(CurrentRightMovementSpeed > -MaxCharacterMovementSpeed)
+		{
+			if(CurrentRightMovementSpeed - TickMovementDistance < -MaxCharacterMovementSpeed)
 			{
-				CurrentRightMovementSpeed -= MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentRightMovementSpeed = -MaxCharacterMovementSpeed;
 			}
 			else
 			{
-				CurrentRightMovementSpeed += MaxCharacterMovementSpeed * AccelerationChangeSpeed * DeltaTime;
+				CurrentRightMovementSpeed -= TickMovementDistance;
 			}
+		}
+		else if(CurrentRightMovementSpeed < -MaxCharacterMovementSpeed)
+		{
+			CurrentRightMovementSpeed += TickMovementDistance;
+		}
 		break;
+			
 	}
 }
 

@@ -10,6 +10,7 @@
 #include "MainCharacterComponents/TP_MainCharMovementComponent.h"
 #include "MainCharacter.generated.h"
 
+class UMainCharacterAnimInstance;
 class AMobilePhone;
 class UDependencyContainer;
 class IInteractable;
@@ -36,18 +37,24 @@ public:
 	UFUNCTION()
 	void PlayAllPlayerServicies();
 
+	UFUNCTION()
+	void AllowPlayerCameraMovement() { CameraController->PlayService(); }
+
+	UFUNCTION()
+	UMainCharacterAnimInstance* CreateAnimInstance(UClass* AnimInstanceClass);
+	
 	UFUNCTION(BlueprintCallable)
-	float GetCharacterForwardMovementSpeed() const { return MovementController->GetForwardMovementSpeed(); }
+	float GetForwardMovementSpeedRelativeToMax() const { return MovementController->GetForwardMovementSpeedRelativeToMax(); }
 
 	UFUNCTION(BlueprintCallable)
-	float GetCharacterRightMovementSpeed() const { return MovementController->GetRightMovementSpeed(); }
+	float GetRightMovementSpeedRelativeToMax() const { return MovementController->GetRightMovementSpeedRelativeToMax(); }
 	
 	void MoveCameraTo(AActor* PositionActor, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;
 	void MoveCameraTo(FVector PositionVector, FRotator RotationVector, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter = false) const;
 	void ReturnCameraToCharacter(float MovementDuration) const;
 
-	AMobilePhone* GetMobilePhone() const;
-	
+	void AttachPhoneToSocket();
+	void DetachPhoneFromSocket();
 protected:	
 	UPROPERTY(EditAnywhere, Category = CameraController)
 	UTP_MainCharacterCameraController* CameraController;
@@ -61,11 +68,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = CameraController)
 	UCameraComponent* MainCamera;
 
+	UPROPERTY(VisibleAnywhere)
+	AMobilePhone* MobilePhone;
+	
 	UPROPERTY(EditAnywhere, Category = Mesh)
 	USkeletalMeshComponent* ArmsMesh;
-
-	UPROPERTY(EditAnywhere, Category = "ChildActor")
-	UChildActorComponent* MobilePhone;
 	
 	UPROPERTY(VisibleAnywhere, Category = HUD)
 	AGameplayHUD* HUD;

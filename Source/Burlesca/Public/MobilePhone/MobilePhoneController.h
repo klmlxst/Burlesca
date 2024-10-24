@@ -6,26 +6,13 @@
 #include "UObject/Object.h"
 #include "MobilePhoneController.generated.h"
 
+enum class EPhoneSituation : uint8;
+enum class EPhoneApplication : uint8;
+class UMainCharacterAnimInstance;
 class AMainCharacter;
 class UInputAction;
 class UMobilePhoneScreen;
 class AMobilePhone;
-
-UENUM()
-enum class EPhoneApplication : uint8
-{
-	MainScreen,
-	GuitarSetup,
-	Chat
-};
-
-UENUM()
-enum class EPhoneSituation : uint8
-{
-	InPocket,
-	InHands,
-	InWorld
-};
 
 /**
  * 
@@ -36,28 +23,41 @@ class BURLESCA_API UMobilePhoneController : public UObject
 	GENERATED_BODY()
 public:
 	UMobilePhoneController();
-	void Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter);
-	void InitInputActions(UInputAction* TakePhoneInOrOutOfHandsAction);
+	void Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter, UMainCharacterAnimInstance* animInstance);
+	void InitInputActions(UInputAction* TakePhoneInOrOutOfHandsAction, UInputAction* focusInOutAction);
 	void SetupInput(UEnhancedInputComponent* enhancedInputComponent);
-
 	
 	void PutPhoneInTheWorld(AActor* situationActor);
 	void TakePhoneFromTheWorld();
 	void SelectViewedApplication(EPhoneApplication PhoneApplication);
 protected:
+	/*  ---  Global Variables  ---  */
+	
 	UPROPERTY()
 	AMobilePhone* MobilePhone;
 
 	UPROPERTY()
 	AMainCharacter* MainCharacter;
+
+	UPROPERTY()
+	UMainCharacterAnimInstance* AnimInstance;
+
+	/*  ---  Change Phone Situation  ---  */
+
+	UFUNCTION()
+	void ResetCanChangePhoneSituation() { bCanChangePhoneSituation = true; }
+
+	UFUNCTION()
+	void SwitchPhoneVisibility();
 	
-	/*  ---  Input Actions  ---  */
+	EPhoneSituation PhoneSituation;
+	bool bCanChangePhoneSituation = true;
+	
+	/*  ---  Phone Take In Hands  ---  */
 
 	UPROPERTY()
 	UInputAction* TakePhoneInOrOutOfHandsAction;
-	
-	/*  ---  Functions  ---  */
-	
+
 	UFUNCTION()
 	void ChoosePhoneTakeOrPut();
 
@@ -67,18 +67,24 @@ protected:
 	UFUNCTION()
 	void PutPhoneInPocket();
 	
+	/*  ---  Phone Focus  ---  */
+
+	UPROPERTY()
+	UInputAction* FocusInOutAction;
+
 	UFUNCTION()
-	void ChangePhoneFocusState();
+	void OnPhoneFocusStateChangeCalled();
 
-	/*  --- Variables  ---  */
-	
+	UFUNCTION()
+	void OnPhoneFocusStateChanged(bool bIsFocused);
+
 	bool bIsPhoneFocused = false;
-	bool bCanChangePhoneSituation = true;
+	bool bCanChangePhoneFocusState = true;
+	
+	/*  ---  Functions  ---  */
+	
+	UFUNCTION()
+	void PowerPhoneOn();
 
-	EPhoneSituation PhoneSituation;
-	
-	FTimerHandle ChangePhoneSituationTimerHandle;
-	
-private:
-	const FVector MOBILE_PHONE_OUT_OF_BOUNDS_LOCATION = FVector(0,0,-30);
+	void SubscribeEvents();
 };

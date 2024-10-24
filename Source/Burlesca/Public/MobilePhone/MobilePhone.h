@@ -3,38 +3,72 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Framework/DependencyInjection/Inject.h"
+#include "InputSetupable.h"
 #include "GameFramework/Actor.h"
 #include "MobilePhone.generated.h"
 
+class UGuitarTunerScreen;
+class UFlashlightScreen;
+class UChatScreen;
+enum class EPhoneApplication : uint8;
+class UHomeScreen;
 class UMobilePhoneController;
 class UWidgetComponent;
-class UMobilePhoneScreen;
 
 UCLASS()
-class BURLESCA_API AMobilePhone : public AActor
+class BURLESCA_API AMobilePhone : public AActor, public IInputSetupable
 {
 	GENERATED_BODY()
 
 public:
 	AMobilePhone();
+	virtual void SetupInput(UEnhancedInputComponent* Input) override;
 	
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION()
+	void SetPowerState(bool bPowerOn);
+	void SetVisibility(bool bIsVisible) const;
+	void OnPhoneFocused();
+	void OnPhoneUnfocused();
 	
-	UPROPERTY(EditDefaultsOnly)
-	UWidgetComponent* MobilePhoneScreenWidgetComponent;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UMobilePhoneScreen> MobilePhoneScreenClass;
-
-	UPROPERTY(VisibleDefaultsOnly)
-	UMobilePhoneScreen* MobilePhoneScreenWidget;
-
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* StaticMesh;
 
-	UPROPERTY(VisibleAnywhere)
-	UMobilePhoneController* MobilePhoneController;
+	UPROPERTY()
+	EPhoneApplication OpenedPhoneApplication;
+protected:
+	void WidgetsCreation();
+
+	UFUNCTION()
+	void OpenApplication(EPhoneApplication application);
 	
+	UPROPERTY(EditDefaultsOnly)
+	UWidgetComponent* MobilePhoneScreenWidgetComponent;
+	
+	/*  ---  Application Widget Classes  ---  */
+	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UHomeScreen> HomeScreenWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UChatScreen> ChatScreenWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UFlashlightScreen> FlashlightWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UGuitarTunerScreen> GuitarTunerWidgetClass;
+
+	/*  ---  Application Widgets  ---  */
+	
+	UPROPERTY(VisibleDefaultsOnly)
+	UHomeScreen* HomeScreenWidget;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UChatScreen* ChatScreenWidget;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UFlashlightScreen* FlashlightWidget;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	UGuitarTunerScreen* GuitarTunerScreenWidget;
 };

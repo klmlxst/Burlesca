@@ -58,11 +58,14 @@ public:
 	UPROPERTY()
 	UMobilePhoneController* MobilePhoneController;
 
-	UPROPERTY()
+	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")
 	AMobilePhone* MobilePhone;	
 
 	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")
 	UInputAction* TakePhoneInOrOutOfHandsAction;
+
+	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")
+	UInputAction* FocusPhoneAction;
 
 	/*  ---  Functions  ---  */
 	

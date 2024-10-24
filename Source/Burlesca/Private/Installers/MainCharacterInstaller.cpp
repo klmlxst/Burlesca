@@ -4,6 +4,8 @@
 #include "Installers/MainCharacterInstaller.h"
 
 #include "MainCharacter.h"
+#include "MainCharacterAnimInstance.h"
+#include "Framework/SignalBus.h"
 #include "Framework/DependencyInjection/DependencyContainer.h"
 #include "Framework/DependencyInjection/DIHelpersClasses.h"
 
@@ -29,7 +31,18 @@ void AMainCharacterInstaller::InstallBindings(UDependencyContainer* Container)
 			SpawnParams.Instigator = GetInstigator();
 
 			MainCharacter = World->SpawnActor<AMainCharacter>(CharacterClass, CharacterSpawnPosition, CharacterSpawnRotation, SpawnParams);
-			Container->Bind<AMainCharacter>()->FromInstance(MainCharacter);
 		}	
 	}
+
+	MainCharacterAnimInstance = MainCharacter->CreateAnimInstance(AnimInstanceClass);
+
+	Container->Bind<AMainCharacter>()->FromInstance(MainCharacter);
+	Container->Bind<UMainCharacterAnimInstance>()->FromInstance(MainCharacterAnimInstance);
+}
+
+void AMainCharacterInstaller::Start(UDependencyContainer* Container)
+{
+	Super::Start(Container);
+
+	MainCharacterAnimInstance->Init(Container->Resolve<USignalBus>());
 }
