@@ -3,6 +3,8 @@
 
 #include "MainCharacter.h"
 
+#include <string>
+
 #include "BurlescaPlayerController.h"
 #include "MainCharacterAnimInstance.h"
 #include "MovieSceneTracksComponentTypes.h"
@@ -29,7 +31,7 @@ void AMainCharacter::ComponentsInitialization()
 	ArmsMesh = FindComponentByClass<USkeletalMeshComponent>();
 	check(ArmsMesh);
 	ArmsMesh->bCastDynamicShadow = false;
-	ArmsMesh->CastShadow = false;
+	ArmsMesh->CastShadow = false;	
 	
 	CameraController = CreateDefaultSubobject<UTP_MainCharacterCameraController>(TEXT("Camera Movement Controller"));
 	MovementController = CreateDefaultSubobject<UTP_MainCharMovementComponent>(TEXT("Player Movement Controller"));
@@ -50,10 +52,10 @@ void AMainCharacter::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)
 }
 
 void AMainCharacter::Inject(UDependencyContainer* Container)
-{
+{	
 	HUD = Container->Resolve<AGameplayHUD>();
 	check(HUD);
-
+	
 	SignalBus = Container->Resolve<USignalBus>();
 	check(SignalBus);
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InputSetupable.h"
+#include "MobilePhoneEnums.h"
 #include "GameFramework/Actor.h"
 #include "MobilePhone.generated.h"
 
@@ -25,7 +26,7 @@ public:
 	virtual void SetupInput(UEnhancedInputComponent* Input) override;
 	
 	UFUNCTION()
-	void SetPowerState(bool bPowerOn);
+	void SetPowerState(bool bPowerOn) const;
 	void SetVisibility(bool bIsVisible) const;
 	void OnPhoneFocused();
 	void OnPhoneUnfocused();
@@ -34,7 +35,7 @@ public:
 	UStaticMeshComponent* StaticMesh;
 
 	UPROPERTY()
-	EPhoneApplication OpenedPhoneApplication;
+	EPhoneApplication OpenedPhoneApplication = EPhoneApplication::HomePage;
 protected:
 	void WidgetsCreation();
 

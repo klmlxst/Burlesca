@@ -30,56 +30,6 @@ void AMobilePhone::SetupInput(UEnhancedInputComponent* Input)
 	GuitarTunerScreenWidget->SetupInput(Input);
 }
 
-void AMobilePhone::SetPowerState(bool bPowerOn)
-{
-	switch (bPowerOn)
-	{
-	case true:
-		OpenedPhoneApplication = EPhoneApplication::HomePage;
-		HomeScreenWidget->OpenApplication();
-		break;
-
-	case false:
-		HomeScreenWidget->DeactivateApplication();
-		HomeScreenWidget->CloseApplication();
-		ChatScreenWidget->DeactivateApplication();
-		ChatScreenWidget->CloseApplication();
-		break;
-	}
-}
-
-void AMobilePhone::SetVisibility(bool bIsVisible) const
-{
-	StaticMesh->SetVisibility(bIsVisible);
-	MobilePhoneScreenWidgetComponent->SetVisibility(bIsVisible);
-}
-
-void AMobilePhone::OnPhoneFocused()
-{
-	switch(OpenedPhoneApplication)
-	{
-	case EPhoneApplication::HomePage:
-		HomeScreenWidget->ActivateApplication();
-		break;
-	case EPhoneApplication::Chat:
-		ChatScreenWidget->ActivateApplication();
-		break;
-	}
-}
-
-void AMobilePhone::OnPhoneUnfocused()
-{
-	switch(OpenedPhoneApplication)
-	{
-	case EPhoneApplication::HomePage:
-		HomeScreenWidget->DeactivateApplication();
-		break;
-	case EPhoneApplication::Chat:
-		ChatScreenWidget->DeactivateApplication();
-		break;
-	}
-}
-
 void AMobilePhone::WidgetsCreation()
 {
 	Super::BeginPlay();
@@ -109,30 +59,101 @@ void AMobilePhone::WidgetsCreation()
 	HomeScreenWidget->OnApplicationOpenCalled.AddDynamic(this, &AMobilePhone::OpenApplication);
 }
 
+void AMobilePhone::SetPowerState(bool bPowerOn) const
+{
+	UPhoneApplication* app = nullptr;
+	
+	switch(OpenedPhoneApplication)
+	{
+		case EPhoneApplication::HomePage:
+			app = HomeScreenWidget;
+		break;
+			
+		case EPhoneApplication::GuitarSetup:
+			app = GuitarTunerScreenWidget;
+		break;
+
+		case EPhoneApplication::Chat:
+			app = ChatScreenWidget;
+		break;
+
+		case EPhoneApplication::Flashlight:
+			app = FlashlightWidget;
+		break;
+	}
+
+	if(!app)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Application Opened Yet"))
+	}
+	
+	if(bPowerOn)
+	{
+		app->OpenApplication();
+	}
+	else
+	{
+		app->CloseApplication();
+	}
+}
+
+void AMobilePhone::SetVisibility(bool bIsVisible) const
+{
+	StaticMesh->SetVisibility(bIsVisible);
+	MobilePhoneScreenWidgetComponent->SetVisibility(bIsVisible);
+}
+
+void AMobilePhone::OnPhoneFocused()
+{
+	UE_LOG(LogTemp,Warning,TEXT("openedPhoneApplication %d"), OpenedPhoneApplication);
+	
+	switch(OpenedPhoneApplication)
+	{
+		case EPhoneApplication::HomePage:
+			HomeScreenWidget->ActivateApplication();
+		break;
+		
+		case EPhoneApplication::Chat:
+			ChatScreenWidget->ActivateApplication();
+		break;
+	}
+}
+
+void AMobilePhone::OnPhoneUnfocused()
+{
+	switch(OpenedPhoneApplication)
+	{
+		case EPhoneApplication::HomePage:
+			HomeScreenWidget->DeactivateApplication();
+		break;
+		
+		case EPhoneApplication::Chat:
+			ChatScreenWidget->DeactivateApplication();
+		break;
+	}
+}
+
 void AMobilePhone::OpenApplication(EPhoneApplication application)
 {
-	HomeScreenWidget->DeactivateApplication();
 	HomeScreenWidget->CloseApplication();
-
+	OpenedPhoneApplication = application;
+	
 	switch(application)
 	{
 		case EPhoneApplication::Chat:
 			ChatScreenWidget->OpenApplication();
-			ChatScreenWidget->ActivateApplication();
 			MobilePhoneScreenWidgetComponent->SetWidget(ChatScreenWidget);
-			break;
+		break;
 
 		case EPhoneApplication::Flashlight:
 			FlashlightWidget->OpenApplication();
-			FlashlightWidget->ActivateApplication();
 			MobilePhoneScreenWidgetComponent->SetWidget(FlashlightWidget);
-			break;
+		break;
 
 		case EPhoneApplication::GuitarSetup:
 			GuitarTunerScreenWidget->OpenApplication();
-			GuitarTunerScreenWidget->ActivateApplication();
 			MobilePhoneScreenWidgetComponent->SetWidget(GuitarTunerScreenWidget);
-			break;
+		break;
 	}
 }
 

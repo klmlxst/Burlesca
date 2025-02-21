@@ -66,6 +66,5 @@ public:
 	virtual void StartSemiFocus() = 0;
 	virtual void EndFocus() = 0;
 	virtual void Interact() = 0;
-	
 	virtual FInteractableObjectInfo* GetInteractableObjectInfo() = 0;
 };

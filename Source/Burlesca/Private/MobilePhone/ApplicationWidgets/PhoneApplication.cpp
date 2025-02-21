@@ -13,7 +13,7 @@ void UPhoneApplication::NativeConstruct()
 }
 
 void UPhoneApplication::OpenApplication()
-{
+{	
 	SetVisibility(ESlateVisibility::Visible);
 	bIsApplicationOpened = true;
 }

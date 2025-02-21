@@ -49,106 +49,31 @@ void UMobilePhoneController::SetupInput(UEnhancedInputComponent* enhancedInputCo
 	enhancedInputComponent->BindAction(FocusInOutAction, ETriggerEvent::Started, this, &UMobilePhoneController::OnPhoneFocusStateChangeCalled);
 }
 
-void UMobilePhoneController::PowerPhoneOn()
-{
-	MobilePhone->SetPowerState(true);
-}
-
 void UMobilePhoneController::SubscribeEvents()
 {
-	AnimInstance->OnPhoneIsInHands.AddDynamic(this, &UMobilePhoneController::PowerPhoneOn);
-	AnimInstance->OnPhoneIsInHands.AddDynamic(this, &UMobilePhoneController::ResetCanChangePhoneSituation);
-	AnimInstance->OnPhoneIsInPocket.AddDynamic(this, &UMobilePhoneController::ResetCanChangePhoneSituation);
+	AnimInstance->OnPhoneIsInHands.AddDynamic(this, &UMobilePhoneController::OnPhonePickedUpFromPocket);
+	AnimInstance->OnPhoneIsInPocket.AddDynamic(this, &UMobilePhoneController::OnPhonePutDownToPocket);
 	AnimInstance->OnPhoneFocusStateChanged.AddDynamic(this, &UMobilePhoneController::OnPhoneFocusStateChanged);
 	AnimInstance->OnHandIsOutOfFOV.AddDynamic(this, &UMobilePhoneController::SwitchPhoneVisibility);
 }
 
-void UMobilePhoneController::PutPhoneInTheWorld(AActor* situationActor)
+void UMobilePhoneController::OnPhonePickedUpFromPocket()
 {
-}
-
-void UMobilePhoneController::TakePhoneFromTheWorld()
-{
-}
-
-void UMobilePhoneController::SelectViewedApplication(EPhoneApplication phoneApplication)
-{
-}
-
-void UMobilePhoneController::SwitchPhoneVisibility()
-{
-	switch (PhoneSituation)
-	{
-	case EPhoneSituation::InHands:
-		MobilePhone->SetVisibility(true);
-		break;
-	
-	case EPhoneSituation::InPocket:
-		MobilePhone->SetVisibility(false);
-		break;
-	}
-}
-
-void UMobilePhoneController::ChoosePhoneTakeOrPut()
-{
-	if(bCanChangePhoneSituation)
-	{
-		switch(PhoneSituation)
-		{
-		case EPhoneSituation::InPocket:
-			bCanChangePhoneSituation = false;
-			TakePhoneInHands();
-			break;
-			
-		case EPhoneSituation::InHands:
-			bCanChangePhoneSituation = false;
-			PutPhoneInPocket();
-			break;
-		}
-	}
-}
-
-void UMobilePhoneController::TakePhoneInHands()
-{
-	bCanChangePhoneSituation = false;
 	PhoneSituation = EPhoneSituation::InHands;
-	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PickUpFromPocket);
+	PowerPhoneOn();
+	ResetCanChangePhoneSituation();
 }
 
-void UMobilePhoneController::PutPhoneInPocket()
+void UMobilePhoneController::OnPhonePutDownToPocket()
 {
-	bCanChangePhoneSituation = false;
 	PhoneSituation = EPhoneSituation::InPocket;
-	MobilePhone->SetPowerState(false);
-	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PutDownInPocket);
-	MainCharacter->PlayAllPlayerServicies();
-}
-
-void UMobilePhoneController::OnPhoneFocusStateChangeCalled()
-{
-	if(PhoneSituation == EPhoneSituation::InHands && bCanChangePhoneFocusState && bCanChangePhoneSituation)
-	{
-		switch(bIsPhoneFocused)
-		{
-		case true:
-			AnimInstance->PlayPhoneAnimation(EPhoneAnimation::Unfocus);
-			bCanChangePhoneFocusState = false;
-			bCanChangePhoneSituation = false;
-			MobilePhone->OnPhoneUnfocused();
-			break;
-			
-		case false:
-			AnimInstance->PlayPhoneAnimation(EPhoneAnimation::Focus);
-			bCanChangePhoneFocusState = false;
-			bCanChangePhoneSituation = false;
-			MainCharacter->StopAllPlayerServicies();
-			break;
-		}
-	}
+	ResetCanChangePhoneSituation();
 }
 
 void UMobilePhoneController::OnPhoneFocusStateChanged(bool bIsFocused)
 {
+	UE_LOG(LogTemp, Display, TEXT("OnPhoneFocusStateChanged , isFocused = %d"), bIsFocused);
+	
 	bIsPhoneFocused = bIsFocused;
 	bCanChangePhoneFocusState = true;
 	bCanChangePhoneSituation = true;
@@ -161,4 +86,96 @@ void UMobilePhoneController::OnPhoneFocusStateChanged(bool bIsFocused)
 	{
 		MobilePhone->OnPhoneFocused();
 	}
+}
+
+void UMobilePhoneController::SwitchPhoneVisibility()
+{
+	switch (PhoneSituation)
+	{
+		case EPhoneSituation::InHands:
+			MobilePhone->SetVisibility(true);
+		break;
+		
+		case EPhoneSituation::InPocket:
+			MobilePhone->SetVisibility(false);
+		break;
+	}
+}
+
+void UMobilePhoneController::ChoosePhoneTakeOrPut()
+{
+	if(bCanChangePhoneSituation)
+	{
+		switch(PhoneSituation)
+		{
+			case EPhoneSituation::InPocket:
+				bCanChangePhoneSituation = false;
+				TakePhoneInHands();
+			break;
+				
+			case EPhoneSituation::InHands:
+				bCanChangePhoneSituation = false;
+				PutPhoneInPocket();
+			break;
+		}
+	}
+}
+
+void UMobilePhoneController::TakePhoneInHands()
+{
+	bCanChangePhoneSituation = false;
+	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PickUpFromPocket);
+}
+
+void UMobilePhoneController::PutPhoneInPocket()
+{
+	bCanChangePhoneSituation = false;
+	MobilePhone->SetPowerState(false);
+	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PutDownInPocket);
+	MainCharacter->PlayAllPlayerServicies();
+}
+
+void UMobilePhoneController::OnPhoneFocusStateChangeCalled()
+{
+	if(PhoneSituation == EPhoneSituation::InHands && bCanChangePhoneFocusState && bCanChangePhoneSituation)
+	{
+		switch(bIsPhoneFocused)
+		{
+			case true:
+				AnimInstance->PlayPhoneAnimation(EPhoneAnimation::Unfocus);
+				bCanChangePhoneFocusState = false;
+				bCanChangePhoneSituation = false;
+				MobilePhone->OnPhoneUnfocused();
+			break;
+				
+			case false:
+				AnimInstance->PlayPhoneAnimation(EPhoneAnimation::Focus);
+				bCanChangePhoneFocusState = false;
+				bCanChangePhoneSituation = false;
+				MainCharacter->StopAllPlayerServicies();
+			break;
+		}
+	}
+}
+
+void UMobilePhoneController::PowerPhoneOn()
+{
+	MobilePhone->SetPowerState(true);
+}
+
+
+
+
+
+
+void UMobilePhoneController::PutPhoneInTheWorld(AActor* situationActor)
+{
+}
+
+void UMobilePhoneController::TakePhoneFromTheWorld()
+{
+}
+
+void UMobilePhoneController::SelectViewedApplication(EPhoneApplication phoneApplication)
+{
 }

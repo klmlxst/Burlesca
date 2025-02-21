@@ -36,16 +36,19 @@ void ABurlescaGameModeBase::StartPlay()
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(DiContainer->Resolve<APlayerController>()->InputComponent);
 	
-	for(TActorIterator<AActor> It(GetWorld()); It; ++It )
+	for(TObjectIterator<UObject> obj; obj; ++obj )
 	{
-		if(It->Implements<UInject>())
+		if (obj->GetWorld() == GetWorld())
 		{
-			Cast<IInject>(*It)->Inject(DiContainer);
-		}
+			if(obj->Implements<UInject>())
+			{
+				Cast<IInject>(*obj)->Inject(DiContainer);
+			}
 		
-		if(It->Implements<UInputSetupable>())
-		{
-			Cast<IInputSetupable>(*It)->SetupInput(EnhancedInputComponent);
+			if(obj->Implements<UInputSetupable>())
+			{
+				Cast<IInputSetupable>(*obj)->SetupInput(EnhancedInputComponent);
+			}
 		}
 	}
 }

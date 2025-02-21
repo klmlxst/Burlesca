@@ -13,11 +13,11 @@
 UENUM()
 enum class EPhoneApplication : uint8
 {
-	None,
-	HomePage,
-	GuitarSetup,
-	Chat,
-	Flashlight
+	None = 0,
+	HomePage = 1,
+	GuitarSetup = 2,
+	Chat = 3,
+	Flashlight = 4
 };
 
 UENUM()

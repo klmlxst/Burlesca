@@ -61,6 +61,4 @@ protected:
 	TArray<UApplicationIcon*> ApplicationIcons;
 	
 	uint8 CurrentSelectedApplicationIcon = 0;
-	bool bIsApplicationOpened = false;
-	bool bIsApplicationActive = false;
 };

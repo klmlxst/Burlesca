@@ -87,4 +87,12 @@ protected:
 	void PowerPhoneOn();
 
 	void SubscribeEvents();
+
+	/*  ---  On Event Functions  ---  */
+
+	UFUNCTION()	
+	void OnPhonePickedUpFromPocket();
+
+	UFUNCTION()
+	void OnPhonePutDownToPocket();
 };

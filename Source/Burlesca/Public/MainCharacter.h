@@ -25,7 +25,6 @@ UCLASS()
 class BURLESCA_API AMainCharacter : public ACharacter, public IInject, public IInputSetupable
 {
 	GENERATED_BODY()
-
 public:
 	AMainCharacter();
 	virtual void SetupInput(UEnhancedInputComponent* InputComponent) override;

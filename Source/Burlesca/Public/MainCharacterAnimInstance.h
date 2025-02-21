@@ -37,9 +37,9 @@ class BURLESCA_API UMainCharacterAnimInstance : public UAnimInstance
 public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
+	
 	void Init(USignalBus* signalBus);
-
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayPhoneAnimation(EPhoneAnimation AnimType);
 

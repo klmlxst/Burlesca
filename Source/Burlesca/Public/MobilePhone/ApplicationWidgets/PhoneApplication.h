@@ -20,9 +20,10 @@ public:
 	
 	virtual void OpenApplication();
 	virtual void CloseApplication();
+
 	virtual void ActivateApplication();
 	virtual void DeactivateApplication();
-
+	
 	bool GetIsApplicationOpened() { return bIsApplicationOpened; }
 	bool GetIsApplicationActive() { return bIsApplicationOpened; }
 

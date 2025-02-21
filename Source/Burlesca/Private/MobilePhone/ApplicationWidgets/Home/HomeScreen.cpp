@@ -38,18 +38,12 @@ void UHomeScreen::CloseApplication()
 }
 
 void UHomeScreen::OnHorizontalChooseAnotherApplicationActionCalled(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp,Warning,TEXT("b"));
-
+{	
 	if(bIsApplicationActive)
 	{
-		UE_LOG(LogTemp,Warning,TEXT("OnHorizontalChooseAnotherApplicationActionCalled"));
-		
 		ApplicationIcons[CurrentSelectedApplicationIcon]->Deselect();
 		if(Value.Get<float>() > 0 && CurrentSelectedApplicationIcon < ApplicationIcons.Num()-1)
 		{
-			UE_LOG(LogTemp,Warning,TEXT("a"));
-
 			CurrentSelectedApplicationIcon++;
 		}
 		else if(Value.Get<float>() < 0 && CurrentSelectedApplicationIcon != 0)
