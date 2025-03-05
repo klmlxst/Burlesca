@@ -21,23 +21,23 @@ TSharedRef<SWidget> FDialogueGraphPropertiesTabFactory::CreateTabBody(const FWor
 		detailsViewArgs.bHideSelectionTip = true;
 		detailsViewArgs.bLockable = false;
 		detailsViewArgs.bSearchInitialKeyFocus = true;
-		detailsViewArgs.bUpdatesFromSelection = false;
+		detailsViewArgs.bUpdatesFromSelection = true;
 		detailsViewArgs.NotifyHook = nullptr;
 		detailsViewArgs.bShowOptions = true;
 		detailsViewArgs.bShowModifiedPropertiesOption = false;
 		detailsViewArgs.bShowScrollBar = false;
 	}
 
-	TSharedPtr<IDetailsView> detailsView = propertyEditorModule.CreateDetailView(detailsViewArgs);
-	detailsView->SetObject(Cast<UObject>(app->GetWorkingAsset()));
-
+	
+	
 	TSharedPtr<IDetailsView> selectedNodeDetailsView = propertyEditorModule.CreateDetailView(detailsViewArgs);
 	selectedNodeDetailsView->SetObject(nullptr);
+	
 	app->SetSelectedNodeDetailView(selectedNodeDetailsView);
 
 	return SNew(SVerticalBox)
 		+ SVerticalBox::Slot()
-		.FillHeight(0.1f)
+		.AutoHeight()
 		.HAlign(HAlign_Fill)
 		.Padding(FMargin(10, 5))
 		[
@@ -51,18 +51,11 @@ TSharedRef<SWidget> FDialogueGraphPropertiesTabFactory::CreateTabBody(const FWor
 			})
 		]
 		+ SVerticalBox::Slot()
-		.FillHeight(1)
-		.HAlign(HAlign_Fill)
-		[
-			detailsView.ToSharedRef()
-		]
-		+ SVerticalBox::Slot()
-		.FillHeight(1)
+		.AutoHeight()
 		.HAlign(HAlign_Fill)
 		[
 			selectedNodeDetailsView.ToSharedRef()
 		];
-		
 }
 
 FText FDialogueGraphPropertiesTabFactory::GetTabToolTipText(const FWorkflowTabSpawnInfo& Info) const

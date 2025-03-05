@@ -2,17 +2,25 @@
 
 #include "Dialogue/DialoguePlayer.h"
 
-ADialogueInstaller::ADialogueInstaller() { }
-
 void ADialogueInstaller::InstallBindings(UDependencyContainer* Container)
+{
+	dialoguePlayer = NewObject<UDialoguePlayer>(this);
+	dialogueSystemManager = NewObject<UDialogueSystemManager>(this);
+	conditionRegistry = NewObject<UConditionRegistry>(this);
+	
+	Container->Bind<UDialogueSystemManager>()->FromInstance(dialogueSystemManager);
+	Container->Bind<UConditionRegistry>()->FromInstance(conditionRegistry);
+}
+
+void ADialogueInstaller::Start(UDependencyContainer* Container)
 {
 	TArray<UDialogueGraphAsset*> dialogues;
 	dialogues.Add(friendDialogueGraphAsset);
+	dialogues.Add(payerDialogueGraphAsset);
 	
-	dialoguePlayer = NewObject<UDialoguePlayer>(this);
-	dialoguePlayer->Init();
 	dialoguePlayer->ProvideDialoguesAssets(dialogues);
 
-	dialogueSystemManager = NewObject<UDialogueSystemManager>(this);
-	dialogueSystemManager->Init();
+	dialogueSystemManager->Init(dialoguePlayer);
+	
+	dialoguePlayer->Init(betweenMessageDelay);
 }

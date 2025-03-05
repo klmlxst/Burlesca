@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "EventContainers/CharacterEventsContainer.h"
 #include "EventContainers/DevicesEventContainer.h"
+#include "EventContainers/DialogueEventsContainer.h"
 #include "EventContainers/GlobalGameEventsContainer.h"
+#include "EventContainers/MusicalInstrumentsEventsContainer.h"
 #include "SignalBus.generated.h"
 
 class UDevicesEventContainer;
@@ -25,6 +27,8 @@ public:
 		CharacterEventsContainer = CreateDefaultSubobject<UCharacterEventsContainer>(TEXT("Characters Event Container"));
 		GlobalGameEventsContainer = CreateDefaultSubobject<UGlobalGameEventsContainer>(TEXT("Global Game Event Container"));
 		DevicesEventContainer = CreateDefaultSubobject<UDevicesEventContainer>(TEXT("Device Event Container"));
+		MusicalInstrumentsEventContainer = CreateDefaultSubobject<UMusicalInstrumentsEventsContainer>(TEXT("Musical Instruments Event Container"));
+		DialogueEventContainer = CreateDefaultSubobject<UDialogueEventsContainer>(TEXT("Dialogue Event Container"));
 	}
 
 	UFUNCTION()
@@ -38,6 +42,14 @@ public:
 	UFUNCTION()
 	UDevicesEventContainer* GetDevicesEventContainer() const
 	{ return DevicesEventContainer; }
+
+	UFUNCTION()
+	UMusicalInstrumentsEventsContainer* GetMusicalInstrumentsEventContainer() const
+	{ return MusicalInstrumentsEventContainer; }
+
+	UFUNCTION()
+	UDialogueEventsContainer* GetDialogueEventContainer() const
+	{ return DialogueEventContainer; }
 	
 protected:
 
@@ -49,4 +61,10 @@ protected:
 
 	UPROPERTY()
 	UDevicesEventContainer* DevicesEventContainer;
+
+	UPROPERTY()
+	UMusicalInstrumentsEventsContainer* MusicalInstrumentsEventContainer;
+
+	UPROPERTY()
+	UDialogueEventsContainer* DialogueEventContainer;
 };

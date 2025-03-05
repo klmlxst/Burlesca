@@ -6,6 +6,8 @@
 
 class UDialogueGraphAsset;
 
+DECLARE_LOG_CATEGORY_EXTERN(DialogueGraph, Log, All);
+
 class FDialogueGraphApp : public FWorkflowCentricApplication, public FEditorUndoClient, public FNotifyHook
 {
 public:
@@ -32,7 +34,7 @@ public:
 	virtual	void OnToolkitHostingStarted(const TSharedRef<IToolkit>& Toolkit) override { FWorkflowCentricApplication::OnToolkitHostingStarted(Toolkit); }
 	virtual void OnToolkitHostingFinished(const TSharedRef<IToolkit>& Toolkit) override { FWorkflowCentricApplication::OnToolkitHostingFinished(Toolkit); }
 
-	virtual void SaveAsset_Execute() override { FWorkflowCentricApplication::SaveAsset_Execute(); FDialogueGraphSaveManager::SaveGraph(_workingAsset, _workingGraph); }
+	virtual void SaveAsset_Execute() override { FDialogueGraphSaveManager::SaveGraph(_workingAsset, _workingGraph); }
 
 private:
 	UPROPERTY()

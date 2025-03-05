@@ -21,6 +21,8 @@ class UAudioComponent;
 
 BURLESCA_API DECLARE_LOG_CATEGORY_EXTERN(MusicianInstruments, All, All);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGuitarSetupComplete);
+
 /**
  * @class UGuitarSetupController
  * @brief This class manages the logic for guitar tuning within the game.
@@ -44,10 +46,14 @@ public:
 	void StartGuitarSetup();
 	void SetupInput(UEnhancedInputComponent* EnhancedInputComponent);
 
-	bool GetIsGuitarSetsUp() const;
+	bool GetIsGuitarSetsUp() const { return bIsGuitarSetsUp; }
+	bool GetIsGuitarSetupCompleted() const { return bIsGuitarSetupCompleted; }
+	
+	FOnGuitarSetupComplete OnGuitarSetupComplete;
 	
 protected:
 	bool bIsGuitarSetsUp = false;
+	bool bIsGuitarSetupCompleted = false;
     bool bIsTimerSucceed = false;
 	bool bIsGuitarPlayStringReloaded = true;
 	

@@ -6,9 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "PhoneApplication.generated.h"
 
-/**
- * 
- */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnApplicationClosed);
+
 UCLASS()
 class BURLESCA_API UPhoneApplication : public UUserWidget
 {
@@ -17,8 +16,11 @@ class BURLESCA_API UPhoneApplication : public UUserWidget
 public:
 	virtual void SetupInput(UEnhancedInputComponent* input);
 	virtual void NativeConstruct() override;
-	
+
+	UFUNCTION(BlueprintCallable)
 	virtual void OpenApplication();
+	
+	UFUNCTION(BlueprintCallable)
 	virtual void CloseApplication();
 
 	virtual void ActivateApplication();
@@ -26,6 +28,8 @@ public:
 	
 	bool GetIsApplicationOpened() { return bIsApplicationOpened; }
 	bool GetIsApplicationActive() { return bIsApplicationOpened; }
+
+	FOnApplicationClosed OnApplicationClosed;
 
 protected:
 	bool bIsApplicationOpened = false;

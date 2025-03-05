@@ -1,6 +1,6 @@
 ﻿#include "Nodes/DialogueGraphEndNode.h"
 
-DEFINE_LOG_CATEGORY_STATIC(DialogueGraph, Log, All)
+#include "App/DialogueGraphApp.h"
 
 UEdGraphPin* UDialogueGraphEndNode::CreateGraphPin(EEdGraphPinDirection direction, FName name)
 {

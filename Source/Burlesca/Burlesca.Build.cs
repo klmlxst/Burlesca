@@ -17,13 +17,6 @@ public class Burlesca : ModuleRules
 			"SlateCore",
 			"DialogueGraphRuntime"
 		});
-			
-		if(Target.bBuildEditor){
-			PublicDependencyModuleNames.AddRange(new string[] {
-				"DialogueGraph"
-			});
-		}
-		
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
 			"UnrealEd", 
@@ -32,7 +25,6 @@ public class Burlesca : ModuleRules
 			"Kismet",  
 			"Slate",
 			"SlateCore",
-			"Burlesca" 
 		});
 	}
 }

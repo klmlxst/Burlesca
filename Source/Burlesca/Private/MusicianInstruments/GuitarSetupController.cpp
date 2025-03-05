@@ -71,11 +71,6 @@ void UGuitarSetupController::StopGuitarSetup()
 	}
 }
 
-bool UGuitarSetupController::GetIsGuitarSetsUp() const
-{
-	return bIsGuitarSetsUp;
-}
-
 float UGuitarSetupController::CalculatePitchFromRotation(float RotationValue) const
 {
 	return FMath::Lerp(0.5f, 1.5f, RotationValue / 10);
@@ -175,6 +170,8 @@ void UGuitarSetupController::RotatePeg(const FInputActionValue& Value)
     		}
     		if(tunnedQuantity == 6)
     		{
+    			bIsGuitarSetupCompleted = true;
+    			OnGuitarSetupComplete.Broadcast();
     			StopGuitarSetup();
     		}
 

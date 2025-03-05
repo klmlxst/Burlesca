@@ -3,98 +3,40 @@
 
 #include "MobilePhone/MobilePhone.h"
 
+#include "Components/AudioComponent.h"
 #include "Components/WidgetComponent.h"
 #include "MobilePhone/MobilePhoneEnums.h"
+#include "MobilePhone/ApplicationWidgets/PhoneApplicationContainer.h"
 #include "MobilePhone/ApplicationWidgets/Chat/ChatScreen.h"
-#include "MobilePhone/ApplicationWidgets/Flashlight/FlashlightScreen.h"
-#include "MobilePhone/ApplicationWidgets/GuitarTuner/GuitarTunerScreen.h"
-#include "MobilePhone/ApplicationWidgets/Home/HomeScreen.h"
 
 AMobilePhone::AMobilePhone()
 {
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	StaticMesh->SetSimulatePhysics(false);
+	StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaticMesh->CastShadow = false;
 	SetRootComponent(StaticMesh);
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>("AudioSource");
+	AudioComponent->SetupAttachment(RootComponent);
 	
 	MobilePhoneScreenWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Mobile Screen Widget"));
 	MobilePhoneScreenWidgetComponent->SetupAttachment(RootComponent);
 	MobilePhoneScreenWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 }
 
-void AMobilePhone::SetupInput(UEnhancedInputComponent* Input)
+void AMobilePhone::Init()
 {
-	WidgetsCreation();
-
-	HomeScreenWidget->SetupInput(Input);
-	FlashlightWidget->SetupInput(Input);
-	ChatScreenWidget->SetupInput(Input);
-	GuitarTunerScreenWidget->SetupInput(Input);
-}
-
-void AMobilePhone::WidgetsCreation()
-{
-	Super::BeginPlay();
-
-	check(MobilePhoneScreenWidgetComponent);
-
-	check(HomeScreenWidgetClass);
-	check(ChatScreenWidgetClass);
-	check(FlashlightWidgetClass);
-	check(GuitarTunerWidgetClass);
-	
-	HomeScreenWidget = CreateWidget<UHomeScreen>(GetWorld(), HomeScreenWidgetClass);
-	ChatScreenWidget = CreateWidget<UChatScreen>(GetWorld(), ChatScreenWidgetClass);
-	FlashlightWidget = CreateWidget<UFlashlightScreen>(GetWorld(), FlashlightWidgetClass);
-	GuitarTunerScreenWidget = CreateWidget<UGuitarTunerScreen>(GetWorld(), GuitarTunerWidgetClass);
-	
-	HomeScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
-	ChatScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
-	FlashlightWidget->SetVisibility(ESlateVisibility::Collapsed);
-	GuitarTunerScreenWidget->SetVisibility(ESlateVisibility::Collapsed);
-	
-	if (HomeScreenWidget)
-	{
-		MobilePhoneScreenWidgetComponent->SetWidget(HomeScreenWidget);
-	}
-
-	HomeScreenWidget->OnApplicationOpenCalled.AddDynamic(this, &AMobilePhone::OpenApplication);
+	AudioComponent->SetSound(NotificationSound);
+	ApplicationsContainer = Cast<UPhoneApplicationContainer>(CreateWidget(GetWorld(), ApplicationsContainerClass));
+	MobilePhoneScreenWidgetComponent->SetWidget(ApplicationsContainer);
+	ApplicationsContainer->SetContainerVisibility(ESlateVisibility::Collapsed);
 }
 
 void AMobilePhone::SetPowerState(bool bPowerOn) const
 {
-	UPhoneApplication* app = nullptr;
-	
-	switch(OpenedPhoneApplication)
-	{
-		case EPhoneApplication::HomePage:
-			app = HomeScreenWidget;
-		break;
-			
-		case EPhoneApplication::GuitarSetup:
-			app = GuitarTunerScreenWidget;
-		break;
-
-		case EPhoneApplication::Chat:
-			app = ChatScreenWidget;
-		break;
-
-		case EPhoneApplication::Flashlight:
-			app = FlashlightWidget;
-		break;
-	}
-
-	if(!app)
-	{
-		UE_LOG(LogTemp, Error, TEXT("No Application Opened Yet"))
-	}
-	
-	if(bPowerOn)
-	{
-		app->OpenApplication();
-	}
-	else
-	{
-		app->CloseApplication();
-	}
+	ESlateVisibility visibility = bPowerOn ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
+	ApplicationsContainer->SetContainerVisibility(visibility);
 }
 
 void AMobilePhone::SetVisibility(bool bIsVisible) const
@@ -105,57 +47,15 @@ void AMobilePhone::SetVisibility(bool bIsVisible) const
 
 void AMobilePhone::OnPhoneFocused()
 {
-	UE_LOG(LogTemp,Warning,TEXT("openedPhoneApplication %d"), OpenedPhoneApplication);
-	
-	switch(OpenedPhoneApplication)
-	{
-		case EPhoneApplication::HomePage:
-			HomeScreenWidget->ActivateApplication();
-		break;
-		
-		case EPhoneApplication::Chat:
-			ChatScreenWidget->ActivateApplication();
-		break;
-	}
+	ApplicationsContainer->ActivateCurrentApplication();
 }
 
 void AMobilePhone::OnPhoneUnfocused()
 {
-	switch(OpenedPhoneApplication)
-	{
-		case EPhoneApplication::HomePage:
-			HomeScreenWidget->DeactivateApplication();
-		break;
-		
-		case EPhoneApplication::Chat:
-			ChatScreenWidget->DeactivateApplication();
-		break;
-	}
+	ApplicationsContainer->DeactivateCurrentApplication();
 }
 
-void AMobilePhone::OpenApplication(EPhoneApplication application)
+UPhoneApplication* AMobilePhone::GetApp(EPhoneApplication app)
 {
-	HomeScreenWidget->CloseApplication();
-	OpenedPhoneApplication = application;
-	
-	switch(application)
-	{
-		case EPhoneApplication::Chat:
-			ChatScreenWidget->OpenApplication();
-			MobilePhoneScreenWidgetComponent->SetWidget(ChatScreenWidget);
-		break;
-
-		case EPhoneApplication::Flashlight:
-			FlashlightWidget->OpenApplication();
-			MobilePhoneScreenWidgetComponent->SetWidget(FlashlightWidget);
-		break;
-
-		case EPhoneApplication::GuitarSetup:
-			GuitarTunerScreenWidget->OpenApplication();
-			MobilePhoneScreenWidgetComponent->SetWidget(GuitarTunerScreenWidget);
-		break;
-	}
+	return ApplicationsContainer->GetApplicationWidget(app);
 }
-
-
-

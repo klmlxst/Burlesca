@@ -20,6 +20,9 @@ public:
 	void Init(USignalBus* signalBus);
 	void PauseGame();
 	void UnpauseGame();
+
+	void ShowCursor();
+	void HideCursor();
 	
 	FORCEINLINE bool GetIsGamePaused() const { return bIsGamePaused; }
 

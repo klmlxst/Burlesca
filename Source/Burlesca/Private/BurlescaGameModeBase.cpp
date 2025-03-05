@@ -29,8 +29,6 @@ void ABurlescaGameModeBase::StartPlay()
 	{
 		SceneContext->InitDiContainer();
 	}	
-
-	SceneContext->StartInstallers();
 	
 	UDependencyContainer* DiContainer = SceneContext->GetDIContainer();
 
@@ -44,7 +42,15 @@ void ABurlescaGameModeBase::StartPlay()
 			{
 				Cast<IInject>(*obj)->Inject(DiContainer);
 			}
-		
+		}
+	}
+
+	SceneContext->StartInstallers();
+	
+	for(TObjectIterator<UObject> obj; obj; ++obj )
+	{
+		if (obj->GetWorld() == GetWorld())
+		{
 			if(obj->Implements<UInputSetupable>())
 			{
 				Cast<IInputSetupable>(*obj)->SetupInput(EnhancedInputComponent);

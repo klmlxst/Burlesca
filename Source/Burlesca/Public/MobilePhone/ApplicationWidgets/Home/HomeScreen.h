@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Blueprint/UserWidget.h"
+#include "InputSetupable.h"
 #include "MobilePhone/ApplicationWidgets/PhoneApplication.h"
 #include "HomeScreen.generated.h"
 
@@ -21,7 +21,7 @@ struct FInputActionValue;
  * 
  */
 UCLASS()
-class BURLESCA_API UHomeScreen : public UPhoneApplication
+class BURLESCA_API UHomeScreen : public UPhoneApplication, public IInputSetupable
 {
 	GENERATED_BODY()
 

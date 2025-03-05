@@ -2,14 +2,10 @@
 #include "App/DialogueGraphAppMode.h"
 #include "DialogueGraphAsset.h"
 #include "DialogueGraphSchema.h"
-#include "App/DialogueGraphSaveManager.h"
-#include "NodeInfo/DialogueGraphQuoteNodeInfo.h"
 #include "Kismet2/BlueprintEditorUtils.h"
-#include "NodeInfo/DialogueGraphEndNodeInfo.h"
-#include "NodeInfo/DialogueGraphInvokeNodeInfo.h"
-#include "NodeInfo/DialogueGraphResponseNodeInfo.h"
-#include "Nodes/DialogueGraphRequestNode.h"
 #include "Nodes/DialogueGraphStartNode.h"
+
+DEFINE_LOG_CATEGORY(DialogueGraph)
 
 void FDialogueGraphApp::RegisterTabSpawners(const TSharedRef<FTabManager>& tabManager)
 {

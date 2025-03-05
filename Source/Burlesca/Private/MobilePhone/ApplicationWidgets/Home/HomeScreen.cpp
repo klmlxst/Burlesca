@@ -5,7 +5,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "MobilePhone/MobilePhoneEnums.h"
-#include "MobilePhone/ApplicationWidgets/Home/ApplicationIcon.h"
+#include "MobilePhone/ApplicationWidgets/Home/Components/ApplicationIcon.h"
 
 void UHomeScreen::SetupInput(UEnhancedInputComponent* input)
 {

@@ -1,13 +1,9 @@
 // Copyright Uncertain Studios (c). All Rights Reserved.
 
-
 #include "MainCharacter.h"
-
-#include <string>
-
 #include "BurlescaPlayerController.h"
+#include "EnhancedInputComponent.h"
 #include "MainCharacterAnimInstance.h"
-#include "MovieSceneTracksComponentTypes.h"
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -28,6 +24,10 @@ void AMainCharacter::ComponentsInitialization()
 	MainCamera->SetupAttachment(RootComponent);
 	MainCamera->bUsePawnControlRotation = true;
 
+	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("Widget Interaction"));
+	WidgetInteraction->SetupAttachment(RootComponent);
+	WidgetInteraction->InteractionSource = EWidgetInteractionSource::Mouse;
+	
 	ArmsMesh = FindComponentByClass<USkeletalMeshComponent>();
 	check(ArmsMesh);
 	ArmsMesh->bCastDynamicShadow = false;
@@ -36,9 +36,11 @@ void AMainCharacter::ComponentsInitialization()
 	CameraController = CreateDefaultSubobject<UTP_MainCharacterCameraController>(TEXT("Camera Movement Controller"));
 	MovementController = CreateDefaultSubobject<UTP_MainCharMovementComponent>(TEXT("Player Movement Controller"));
 	InteractionController = CreateDefaultSubobject<UTP_MainCharInteractionController>(TEXT("Interaction Controller"));
+	
 	check(CameraController);
 	check(MovementController);
 	check(InteractionController);
+	check(WidgetInteraction);
 }
 
 void AMainCharacter::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)
@@ -49,6 +51,9 @@ void AMainCharacter::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)
 	MovementController->SetupInput(EnhancedInputComponent);
 	check(InteractionController)
 	InteractionController->SetupInput(EnhancedInputComponent);
+
+	EnhancedInputComponent->BindAction(MousePressInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::OnLMBPressed);
+	EnhancedInputComponent->BindAction(MouseReleaseInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::OnLMBReleased);
 }
 
 void AMainCharacter::Inject(UDependencyContainer* Container)

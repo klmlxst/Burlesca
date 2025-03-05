@@ -1,11 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MobilePhone/MobilePhoneController.h"
-
 #include "EnhancedInputComponent.h"
 #include "MainCharacter.h"
-#include "MainCharacterAnimInstance.h"
 #include "MobilePhone/MobilePhone.h"
 #include "MobilePhone/MobilePhoneEnums.h"
 
@@ -14,27 +11,23 @@ UMobilePhoneController::UMobilePhoneController()
 	PhoneSituation = EPhoneSituation::InPocket;
 }
 
-void UMobilePhoneController::Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter, UMainCharacterAnimInstance* animInstance)
+void UMobilePhoneController::Init()
 {
-	MobilePhone = mobilePhone;
-	if(MobilePhone == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Mobile phone is null in installer"));
-	}
-
-	MainCharacter = mainCharacter;
-	if(MainCharacter == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Main character is null in installer"));
-	}
-
-	AnimInstance = animInstance;
-	if(AnimInstance == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Anim instance is null in installer"));
-	}
-
 	SubscribeEvents();
+}
+
+void UMobilePhoneController::Inject(UDependencyContainer* Container)
+{
+	MainCharacter = Container->Resolve<AMainCharacter>();
+	check(MainCharacter)
+
+	MobilePhone = Container->Resolve<AMobilePhone>();
+	check(MobilePhone)
+
+	AnimInstance = Container->Resolve<UMainCharacterAnimInstance>();
+	check(AnimInstance)
+	
+	PlayerController = Container->Resolve<ABurlescaPlayerController>();
 }
 
 void UMobilePhoneController::InitInputActions(UInputAction* takePhoneInOrOutOfHandsAction, UInputAction* focusInOutAction)
@@ -55,6 +48,32 @@ void UMobilePhoneController::SubscribeEvents()
 	AnimInstance->OnPhoneIsInPocket.AddDynamic(this, &UMobilePhoneController::OnPhonePutDownToPocket);
 	AnimInstance->OnPhoneFocusStateChanged.AddDynamic(this, &UMobilePhoneController::OnPhoneFocusStateChanged);
 	AnimInstance->OnHandIsOutOfFOV.AddDynamic(this, &UMobilePhoneController::SwitchPhoneVisibility);
+}
+
+void UMobilePhoneController::ChoosePhoneTakeOrPut() 
+{
+	if(bCanChangePhoneSituation)
+	{
+		switch(PhoneSituation)
+		{
+		case EPhoneSituation::InPocket:
+			bCanChangePhoneSituation = false;
+			TakePhoneInHands();
+			break;
+				
+		case EPhoneSituation::InHands:
+			bCanChangePhoneSituation = false;
+			PutPhoneInPocket();
+			break;
+		}
+	}
+}
+
+void UMobilePhoneController::PutPhoneInPocket()
+{
+	MobilePhone->SetPowerState(false);
+	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PutDownInPocket);
+	MainCharacter->PlayAllPlayerServicies();
 }
 
 void UMobilePhoneController::OnPhonePickedUpFromPocket()
@@ -81,10 +100,12 @@ void UMobilePhoneController::OnPhoneFocusStateChanged(bool bIsFocused)
 	if(!bIsFocused)
 	{
 		MainCharacter->PlayAllPlayerServicies();
+		PlayerController->HideCursor();
 	}
 	else
 	{
 		MobilePhone->OnPhoneFocused();
+		PlayerController->ShowCursor();
 	}
 }
 
@@ -100,39 +121,6 @@ void UMobilePhoneController::SwitchPhoneVisibility()
 			MobilePhone->SetVisibility(false);
 		break;
 	}
-}
-
-void UMobilePhoneController::ChoosePhoneTakeOrPut()
-{
-	if(bCanChangePhoneSituation)
-	{
-		switch(PhoneSituation)
-		{
-			case EPhoneSituation::InPocket:
-				bCanChangePhoneSituation = false;
-				TakePhoneInHands();
-			break;
-				
-			case EPhoneSituation::InHands:
-				bCanChangePhoneSituation = false;
-				PutPhoneInPocket();
-			break;
-		}
-	}
-}
-
-void UMobilePhoneController::TakePhoneInHands()
-{
-	bCanChangePhoneSituation = false;
-	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PickUpFromPocket);
-}
-
-void UMobilePhoneController::PutPhoneInPocket()
-{
-	bCanChangePhoneSituation = false;
-	MobilePhone->SetPowerState(false);
-	AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PutDownInPocket);
-	MainCharacter->PlayAllPlayerServicies();
 }
 
 void UMobilePhoneController::OnPhoneFocusStateChangeCalled()

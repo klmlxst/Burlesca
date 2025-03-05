@@ -11,12 +11,6 @@ class DIALOGUEGRAPHRUNTIME_API UDialogueGraphQuoteNodeInfo : public UDialogueGra
 
 public:
 	UPROPERTY(EditAnywhere)
-	FText Title;
-
-	UPROPERTY(EditAnywhere)
 	FText DialogueText;
-
-	UPROPERTY(EditAnywhere)
-	TArray<FText> DialogueResponses;
 };
 	

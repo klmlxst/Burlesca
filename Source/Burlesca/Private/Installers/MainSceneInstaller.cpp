@@ -24,18 +24,14 @@ void AMainSceneInstaller::InstallBindings(UDependencyContainer* Container)
 	if(Container)
 	{
 		PlayerController = GetWorld()->GetFirstPlayerController<ABurlescaPlayerController>();
-		
-		Container->Bind<APlayerController>()->FromInstance(PlayerController);
-		Container->Bind<ABurlescaPlayerController>()->FromInstance(PlayerController);
-
 		SignalBus = NewObject<USignalBus>(this);
 		EscapeButtonController =  NewObject<UEscapeButtonController>(this);
 		SettingsContainer = NewObject<USettingsContainer>(this);
+		MobilePhone = Cast<AMobilePhone>(GetWorld()->SpawnActor<AActor>(MobilePhoneClass, FVector::ZeroVector, FRotator::ZeroRotator));
 		MobilePhoneController = NewObject<UMobilePhoneController>(this);
-		MobilePhone->StaticMesh->SetSimulatePhysics(false);
-		MobilePhone->StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		MobilePhone->StaticMesh->CastShadow = false;
-		
+
+		Container->Bind<APlayerController>()->FromInstance(PlayerController);
+		Container->Bind<ABurlescaPlayerController>()->FromInstance(PlayerController);
 		Container->Bind<USignalBus>()->FromInstance(SignalBus);
 		Container->Bind<UEscapeButtonController>()->FromInstance(EscapeButtonController);
 		Container->Bind<USettingsContainer>()->FromInstance(SettingsContainer);
@@ -57,9 +53,11 @@ void AMainSceneInstaller::Start(UDependencyContainer* Container)
 	
 	EscapeButtonController->Init(SignalBus, EscapeButtonPressedAction, MainCharacter, PlayerController);
 	EscapeButtonController->InitServicies(Container->Resolve<UGuitarSetupController>());
+	
+	MobilePhone->Init();
 
-	MobilePhoneController->Init(MobilePhone, MainCharacter, Container->Resolve<UMainCharacterAnimInstance>());
 	MobilePhoneController->InitInputActions(TakePhoneInOrOutOfHandsAction, FocusPhoneAction);
+	MobilePhoneController->Init();
 }
 
 void AMainSceneInstaller::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)

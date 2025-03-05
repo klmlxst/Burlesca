@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BurlescaPlayerController.h"
+#include "MainCharacterAnimInstance.h"
+#include "Framework/DependencyInjection/Inject.h"
 #include "UObject/Object.h"
 #include "MobilePhoneController.generated.h"
 
@@ -18,12 +21,13 @@ class AMobilePhone;
  * 
  */
 UCLASS()
-class BURLESCA_API UMobilePhoneController : public UObject
+class BURLESCA_API UMobilePhoneController : public UObject, public IInject
 {
 	GENERATED_BODY()
 public:
 	UMobilePhoneController();
-	void Init(AMobilePhone* mobilePhone, AMainCharacter* mainCharacter, UMainCharacterAnimInstance* animInstance);
+	void Init();
+	virtual void Inject(UDependencyContainer* Container) override;
 	void InitInputActions(UInputAction* TakePhoneInOrOutOfHandsAction, UInputAction* focusInOutAction);
 	void SetupInput(UEnhancedInputComponent* enhancedInputComponent);
 	
@@ -32,6 +36,9 @@ public:
 	void SelectViewedApplication(EPhoneApplication PhoneApplication);
 protected:
 	/*  ---  Global Variables  ---  */
+
+	UPROPERTY()
+	ABurlescaPlayerController* PlayerController;
 	
 	UPROPERTY()
 	AMobilePhone* MobilePhone;
@@ -62,7 +69,7 @@ protected:
 	void ChoosePhoneTakeOrPut();
 
 	UFUNCTION()
-	void TakePhoneInHands();
+	void TakePhoneInHands() { AnimInstance->PlayPhoneAnimation(EPhoneAnimation::PickUpFromPocket); }
 	
 	UFUNCTION()
 	void PutPhoneInPocket();

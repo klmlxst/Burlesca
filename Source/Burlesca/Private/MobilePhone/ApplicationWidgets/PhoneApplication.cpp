@@ -20,6 +20,8 @@ void UPhoneApplication::OpenApplication()
 
 void UPhoneApplication::CloseApplication()
 {
+	OnApplicationClosed.Broadcast();
+	DeactivateApplication();
 	SetVisibility(ESlateVisibility::Collapsed);
 	bIsApplicationOpened = false;
 }

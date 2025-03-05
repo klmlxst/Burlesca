@@ -1,6 +1,7 @@
 ﻿#include "App/DialogueGraphSaveManager.h"
 #include "DialogueGraphAsset.h"
 #include "DialogueGraphRuntimeGraph.h"
+#include "App/DialogueGraphApp.h"
 #include "Nodes/DialogueGraphEndNode.h"
 #include "Nodes/DialogueGraphInvokeNode.h"
 #include "Nodes/DialogueGraphQuoteNode.h"
@@ -8,32 +9,39 @@
 #include "Nodes/DialogueGraphResponseNode.h"
 #include "Nodes/DialogueGraphStartNode.h"
 
-DEFINE_LOG_CATEGORY_STATIC(DialogueGraph, Log, All)
-
 void FDialogueGraphSaveManager::SaveGraph(UDialogueGraphAsset* asset, UEdGraph* graph)
 {
-	if(asset == nullptr || graph == nullptr)
+	if(asset == nullptr)
 	{
+		UE_LOG(DialogueGraph, Warning, TEXT("Asset is null via save"));
+		return;
+	}
+	if(graph == nullptr)
+	{
+		UE_LOG(DialogueGraph, Warning, TEXT("Graph is null via save"));
 		return;
 	}
 
 	UDialogueGraphRuntimeGraph* runtimeGraph = NewObject<UDialogueGraphRuntimeGraph>(asset);
 	asset->Graph = runtimeGraph;
-
+	
 	TArray<std::pair<FGuid, FGuid>> connections;
 	TMap<FGuid, UDialogueGraphRuntimePin*> idToPinMap;
 
 	for(UEdGraphNode* uiNode : graph->Nodes)
-	{		
+	{
+		UDialogueGraphNodeBase* dialogueNode = Cast<UDialogueGraphNodeBase>(uiNode);
 		UDialogueGraphRuntimeNode* runtimeNode = NewObject<UDialogueGraphRuntimeNode>(runtimeGraph);
-		runtimeNode->Position = FVector2D(uiNode->NodePosX, uiNode->NodePosY);
 		
-		for(UEdGraphPin* uiPin : uiNode->Pins)
+		runtimeNode->Position = FVector2D(dialogueNode->NodePosX, dialogueNode->NodePosY);
+		
+		for(UEdGraphPin* uiPin : dialogueNode->Pins)
 		{
 			UDialogueGraphRuntimePin* runtimePin = NewObject<UDialogueGraphRuntimePin>(runtimeNode);
 			runtimePin->PinName = uiPin->PinName;
 			runtimePin->PinId = uiPin->PinId;
-
+			runtimePin->ParentNode = runtimeNode;
+			
 			if(uiPin->HasAnyConnections() && uiPin->Direction == EGPD_Output)
 			{
 				std::pair<FGuid, FGuid> connection = std::pair(uiPin->PinId, uiPin->LinkedTo[0]->PinId);
@@ -51,23 +59,32 @@ void FDialogueGraphSaveManager::SaveGraph(UDialogueGraphAsset* asset, UEdGraph* 
 			}
 		}
 		
-		if(uiNode->IsA(UDialogueGraphQuoteNode::StaticClass()))
+		if(dialogueNode->IsA(UDialogueGraphQuoteNode::StaticClass()))
 		{
-			UDialogueGraphQuoteNode* quoteNode = Cast<UDialogueGraphQuoteNode>(uiNode);
 			runtimeNode->NodeType = EDialogueGraphNodeType::QuoteNode;
-			runtimeNode->NodeInfo = quoteNode->GetNodeInfo();
 		}
-		else if(uiNode->IsA(UDialogueGraphEndNode::StaticClass()))
+		else if(dialogueNode->IsA(UDialogueGraphRequestNode::StaticClass()))
 		{
-			UDialogueGraphEndNode* endNode = Cast<UDialogueGraphEndNode>(uiNode);
-			runtimeNode->NodeType = EDialogueGraphNodeType::EndNode;
-			runtimeNode->NodeInfo = endNode->GetNodeInfo();
+			runtimeNode->NodeType = EDialogueGraphNodeType::RequestNode;
 		}
-		else if(uiNode->IsA(UDialogueGraphStartNode::StaticClass()))
+		else if(dialogueNode->IsA(UDialogueGraphResponseNode::StaticClass()))
+		{
+			runtimeNode->NodeType = EDialogueGraphNodeType::ResponseNode;
+		}
+		else if(dialogueNode->IsA(UDialogueGraphInvokeNode::StaticClass()))
+		{
+			runtimeNode->NodeType = EDialogueGraphNodeType::InvokeNode;
+		}
+		else if(dialogueNode->IsA(UDialogueGraphEndNode::StaticClass()))
+		{
+			runtimeNode->NodeType = EDialogueGraphNodeType::EndNode;
+		}
+		else if(dialogueNode->IsA(UDialogueGraphStartNode::StaticClass()))
 		{
 			runtimeNode->NodeType = EDialogueGraphNodeType::StartNode;
 		}
-
+		
+		runtimeNode->NodeInfo = dialogueNode->GetNodeInfo();
 		runtimeGraph->Nodes.Add(runtimeNode);
 	}
 
@@ -76,8 +93,9 @@ void FDialogueGraphSaveManager::SaveGraph(UDialogueGraphAsset* asset, UEdGraph* 
 		UDialogueGraphRuntimePin* pin1 = *idToPinMap.Find(connection.first);
 		UDialogueGraphRuntimePin* pin2 = *idToPinMap.Find(connection.second);
 		pin1->Connection = pin2;
-		UE_LOG(LogTemp, Warning, TEXT("called save connection"))
 	}
+
+	asset->Modify();
 }
 
 void FDialogueGraphSaveManager::LoadGraph(UDialogueGraphAsset* asset, UEdGraph* graph)
@@ -120,10 +138,6 @@ void FDialogueGraphSaveManager::LoadGraph(UDialogueGraphAsset* asset, UEdGraph* 
 			case EDialogueGraphNodeType::InvokeNode:
 				uiNode = NewObject<UDialogueGraphInvokeNode>(graph);
 				break;
-
-			case EDialogueGraphNodeType::Unknown:
-				UE_LOG(DialogueGraph, Error, TEXT("FDialogueGraphApp::UpdateEditorGraphFromWorkingAsset: Unknown node type"));
-				continue;
 			
 			default:
 				UE_LOG(DialogueGraph, Error, TEXT("FDialogueGraphApp::UpdateEditorGraphFromWorkingAsset: Unknown node type"));
@@ -184,4 +198,6 @@ void FDialogueGraphSaveManager::LoadGraph(UDialogueGraphAsset* asset, UEdGraph* 
 			}
 		}
 	}
+
+	graph->Modify();
 }

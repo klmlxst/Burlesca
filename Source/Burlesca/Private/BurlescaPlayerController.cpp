@@ -14,7 +14,7 @@ void ABurlescaPlayerController::PauseGame()
 {
 	SignalBus->GetGlobalGameEventsContainer()->OnGamePaused.Broadcast();
 	bIsGamePaused = true;
-	bShowMouseCursor = true;
+	ShowCursor();
 	
 	SetPause(true);
 }
@@ -23,7 +23,17 @@ void ABurlescaPlayerController::UnpauseGame()
 {
 	SignalBus->GetGlobalGameEventsContainer()->OnGameUnpaused.Broadcast();
 	bIsGamePaused = false;
-	bShowMouseCursor = false;
-	
+
+	HideCursor();
 	SetPause(false);
+}
+
+void ABurlescaPlayerController::ShowCursor()
+{
+	bShowMouseCursor = true;
+}
+
+void ABurlescaPlayerController::HideCursor()
+{
+	bShowMouseCursor = false;
 }

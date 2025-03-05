@@ -9,10 +9,15 @@ class DIALOGUEGRAPHRUNTIME_API UDialogueGraphNodeInfo_Base : public UObject
 	GENERATED_BODY()
 
 public:
-	uint64 GetNodeId();
-	void SetNodeId(uint64 nodeId) { _nodeId = nodeId; }
-	
+	int GetNodeId() { return _nodeId; }
+	void SetNodeId(int nodeId) { _nodeId = nodeId; }
+
+	int GetDelayTime() { return _delayTime; }
+	void SetDelayTime(int delayTime) { _delayTime = delayTime; }
 protected:
 	UPROPERTY(VisibleAnywhere)
-	uint64 _nodeId = 0;
+	int _nodeId = 0;
+
+	UPROPERTY(EditAnywhere)
+	int _delayTime = -1; // -1 to use default
 };

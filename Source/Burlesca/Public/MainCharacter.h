@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "InputSetupable.h"
+#include "Components/WidgetInteractionComponent.h"
 #include "Framework/DependencyInjection/Inject.h"
 #include "GameFramework/Character.h"
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
@@ -63,10 +64,19 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = MovementController)
 	UTP_MainCharInteractionController* InteractionController;
+
+	UPROPERTY(EditAnywhere, Category = Interaction)
+	UWidgetInteractionComponent* WidgetInteraction;
 	
 	UPROPERTY(EditAnywhere, Category = CameraController)
 	UCameraComponent* MainCamera;
 
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	UInputAction* MousePressInputAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	UInputAction* MouseReleaseInputAction;
+	
 	UPROPERTY(VisibleAnywhere)
 	AMobilePhone* MobilePhone;
 	
@@ -87,4 +97,10 @@ protected:
 	
 	UFUNCTION()
 	void DeactivateStaticMesh() { ArmsMesh->SetVisibility(false); }
+
+	UFUNCTION()
+	void OnLMBPressed() { WidgetInteraction->PressPointerKey(EKeys::LeftMouseButton); }
+
+	UFUNCTION()
+	void OnLMBReleased() { WidgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton); }
 };

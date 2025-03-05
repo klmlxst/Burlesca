@@ -58,9 +58,12 @@ public:
 	UPROPERTY()
 	UMobilePhoneController* MobilePhoneController;
 
-	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")
+	UPROPERTY()
 	AMobilePhone* MobilePhone;	
 
+	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")
+	TSubclassOf<AMobilePhone> MobilePhoneClass;
+	
 	UPROPERTY(EditInstanceOnly, Category = "MobilePhoneController")
 	UInputAction* TakePhoneInOrOutOfHandsAction;
 
