@@ -4,13 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Interactable.h"
+#include "Framework/DependencyInjection/Inject.h"
 #include "GameFramework/Actor.h"
 #include "DefaultInteractableObject.generated.h"
 
+class AMainCharacter;
+class USignalBus;
 struct FInteractableObjectInfo;
 
 UCLASS(Abstract)
-class BURLESCA_API ADefaultInteractableObject : public AActor, public IInteractable
+class BURLESCA_API ADefaultInteractableObject : public AActor, public IInteractable, public IInject
 {
 	GENERATED_BODY()
 	
@@ -23,10 +26,20 @@ public:
 	virtual void Interact() override;
 	
 	virtual FInteractableObjectInfo* GetInteractableObjectInfo() override;
+
+	virtual void Inject(UDependencyContainer* Container) override;
+	
+protected:	
+	UPROPERTY(EditAnywhere, Category="Interactivity Settings");
+	FInteractableObjectInfo InteractableObjectInfo;
+	
+	UPROPERTY()
+	USignalBus* SignalBus;
+
+	UPROPERTY()
+	AMainCharacter* MainCharacter;
 	
 protected:
-	virtual void BeginPlay() override;
-	
-	UPROPERTY(EditInstanceOnly)
-	FInteractableObjectInfo InteractableObjectInfo;
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* StaticMeshComponent;
 };

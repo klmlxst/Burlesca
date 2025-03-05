@@ -23,12 +23,12 @@ void UInteractionInfo::NativeConstruct()
 void UInteractionInfo::UpdateWidget(const FInteractableObjectInfo* InteractableObjectInfo) const
 {
 	NameText->SetText(InteractableObjectInfo->Name);
+	KeyToPressText->SetText(FText::FromString("Press [E] To Interact"));
 	LockImage->SetVisibility(ESlateVisibility::Collapsed);
 	
 	switch (InteractableObjectInfo->InteractionType)
 	{
 		case EInteractableObjectType::CommonInteraction:
-			
 			break;
 		
 		case EInteractableObjectType::Hidden:
@@ -44,6 +44,9 @@ void UInteractionInfo::UpdateWidget(const FInteractableObjectInfo* InteractableO
 			NameText->SetText(FText::FromString(""));
 			KeyToPressText->SetText(FText::FromString("Press [E] To Put Item Down"));
 			break;
+		
+		case EInteractableObjectType::Other:
+			break;
 	}
 
 	if(InteractableObjectInfo->ActivityState == EInteractableObjectActivityState::SemiActive)
@@ -57,14 +60,10 @@ void UInteractionInfo::ShowHintInInteractionWidget(const FText HintText) const
 	SemiActiveHintText->SetText(HintText);
 }
 
-void UInteractionInfo::ClearHintInInteractionWidget() const
-{
-	SemiActiveHintText->SetText(FText::GetEmpty());
-}
-
 void UInteractionInfo::ClearWIdget()
 {
 	NameText->SetText(FText::GetEmpty());
 	KeyToPressText->SetText(FText::GetEmpty());
 	SemiActiveHintText->SetText(FText::GetEmpty());
+	LockImage->SetVisibility(ESlateVisibility::Collapsed);
 }

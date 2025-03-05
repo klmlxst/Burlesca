@@ -1,53 +1,21 @@
 // Copyright Uncertain Studios (c). All Rights Reserved.
 
-
 #include "MainCharacter.h"
-
-#include "EnhancedInputSubsystems.h"
+#include "BurlescaPlayerController.h"
+#include "EnhancedInputComponent.h"
+#include "MainCharacterAnimInstance.h"
 #include "MainCharacterComponents/TP_MainCharacterCameraController.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Framework/DependencyInjection/DependencyInjection.h"
 #include "MainCharacterComponents/Interaction//TP_MainCharInteractionController.h"
+#include "Framework/SignalBus.h"
 #include "MainCharacterComponents/TP_MainCharMovementComponent.h"
+#include "MobilePhone/MobilePhone.h"
+#include "Settings/SettingsContainer.h"
 
 AMainCharacter::AMainCharacter()
 {
 	ComponentsInitialization();
-
-	UE_LOG(DependencyInjection, Log, TEXT("Character constructed"));
-}
-
-void AMainCharacter::BeginPlay() 
-{
-	Super::BeginPlay();
-
-	if (const APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
-	
-	ControllerComponentsSetup();
-}
-
-void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	check(CameraController);
-	CameraController->SetupInput(PlayerInputComponent);
-	check(MovementController);
-	MovementController->SetupInput(PlayerInputComponent);
-	check(InteractionController)
-	InteractionController->SetupInput(PlayerInputComponent);
-}
-
-void AMainCharacter::Construct()
-{
-	UE_LOG(DependencyInjection, Log, TEXT("Inject nothing"));
 }
 
 void AMainCharacter::ComponentsInitialization()
@@ -56,22 +24,121 @@ void AMainCharacter::ComponentsInitialization()
 	MainCamera->SetupAttachment(RootComponent);
 	MainCamera->bUsePawnControlRotation = true;
 
+	WidgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("Widget Interaction"));
+	WidgetInteraction->SetupAttachment(RootComponent);
+	WidgetInteraction->InteractionSource = EWidgetInteractionSource::Mouse;
+	
 	ArmsMesh = FindComponentByClass<USkeletalMeshComponent>();
 	check(ArmsMesh);
 	ArmsMesh->bCastDynamicShadow = false;
-	ArmsMesh->CastShadow = false;
-
+	ArmsMesh->CastShadow = false;	
+	
 	CameraController = CreateDefaultSubobject<UTP_MainCharacterCameraController>(TEXT("Camera Movement Controller"));
 	MovementController = CreateDefaultSubobject<UTP_MainCharMovementComponent>(TEXT("Player Movement Controller"));
 	InteractionController = CreateDefaultSubobject<UTP_MainCharInteractionController>(TEXT("Interaction Controller"));
+	
 	check(CameraController);
 	check(MovementController);
 	check(InteractionController);
+	check(WidgetInteraction);
 }
 
-void AMainCharacter::ControllerComponentsSetup()
+void AMainCharacter::SetupInput(UEnhancedInputComponent* EnhancedInputComponent)
 {
-	CameraController->Init(MainCamera);
-	InteractionController->Init(MainCamera);
+	check(CameraController);
+	CameraController->SetupInput(EnhancedInputComponent);
+	check(MovementController);
+	MovementController->SetupInput(EnhancedInputComponent);
+	check(InteractionController)
+	InteractionController->SetupInput(EnhancedInputComponent);
+
+	EnhancedInputComponent->BindAction(MousePressInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::OnLMBPressed);
+	EnhancedInputComponent->BindAction(MouseReleaseInputAction, ETriggerEvent::Triggered, this, &AMainCharacter::OnLMBReleased);
 }
 
+void AMainCharacter::Inject(UDependencyContainer* Container)
+{	
+	HUD = Container->Resolve<AGameplayHUD>();
+	check(HUD);
+	
+	SignalBus = Container->Resolve<USignalBus>();
+	check(SignalBus);
+
+	UInputSettingsContainer* InputSettingsContainer = Container->Resolve<USettingsContainer>()->GetInputSettingsContainer();
+	
+	CameraController->Init(MainCamera, SignalBus, InputSettingsContainer);
+	InteractionController->Init(MainCamera, HUD, SignalBus);
+	
+	ABurlescaPlayerController* PlayerController = Container->Resolve<ABurlescaPlayerController>();
+	PlayerController->SetViewTarget(this);
+	MainCamera->Activate();
+
+	MobilePhone = Container->Resolve<AMobilePhone>();
+	AttachPhoneToSocket();
+	SubscribeEvents();
+}
+
+void AMainCharacter::SubscribeEvents()
+{
+	check(SignalBus);
+	
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraMovedOutFromCharacter.AddDynamic(this, &AMainCharacter::StopAllPlayerServicies);
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraReturnedToCharacter.AddDynamic(this, &AMainCharacter::PlayAllPlayerServicies);
+
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraMovedOutFromCharacter.AddDynamic(this, &AMainCharacter::DeactivateStaticMesh);
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraReturnedToCharacter.AddDynamic(this, &AMainCharacter::ActivateStaticMesh);
+}
+
+void AMainCharacter::StopAllPlayerServicies()
+{
+	CameraController->StopService();
+	InteractionController->StopService();
+	MovementController->StopService();
+}
+
+void AMainCharacter::PlayAllPlayerServicies()
+{
+	CameraController->PlayService();
+	InteractionController->PlayService();
+	MovementController->PlayService();
+}
+
+UMainCharacterAnimInstance* AMainCharacter::CreateAnimInstance(UClass* AnimInstanceClass)
+{
+	ArmsMesh->SetAnimClass(AnimInstanceClass);
+	return Cast<UMainCharacterAnimInstance>(ArmsMesh->GetAnimInstance());
+}
+
+void AMainCharacter::MoveCameraTo(AActor* PositionActor, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter) const
+{
+	if(CameraController)
+	{
+		CameraController->MoveCameraTo(PositionActor, MovementDuration, bIsMovingFromCharacter);
+	}
+}
+
+void AMainCharacter::MoveCameraTo(FVector PositionVector, FRotator RotationVector, float MovementDuration, bool bIsMovingFromCharacter, bool bIsMovingToCharacter) const
+{
+	if(CameraController)
+	{
+		CameraController->MoveCameraTo(PositionVector, RotationVector, MovementDuration, bIsMovingFromCharacter);
+	}
+}
+
+void AMainCharacter::ReturnCameraToCharacter(float MovementDuration) const
+{
+	if(CameraController)
+	{
+		CameraController->ReturnCameraToCharacter(MovementDuration);
+	}
+}
+
+void AMainCharacter::AttachPhoneToSocket()
+{
+	MobilePhone->AttachToComponent(ArmsMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "phone_socket");
+}
+
+void AMainCharacter::DetachPhoneFromSocket()
+{
+	MobilePhone->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}

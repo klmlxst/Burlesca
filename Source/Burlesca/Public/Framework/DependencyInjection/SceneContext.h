@@ -18,14 +18,14 @@ public:
 	ASceneContext();
 
 	void InitDiContainer();
+	void StartInstallers();
+	
 	UDependencyContainer* GetDIContainer() const;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Dependency Injection", meta = (AllowedClasses = "InjectionInstaller"))
 	TArray<AInjectionInstaller*> SceneInstallers;
-
-	virtual void PostInitProperties() override;
-
+	
 	UPROPERTY()
 	UDependencyContainer* DIContainer;
 };

@@ -3,11 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DependencyContainer.h"
 #include "DIHelpersClasses.generated.h"
 
-class UToBinder;
-class UFromBinder;
 class UDependencyContainer;
 
 UCLASS()
@@ -34,9 +31,19 @@ class BURLESCA_API UFromBinder : public UObject
 
 public:
 	UFromBinder();
-	
+
+	/**
+	* @brief Don't use this function.
+	* It`s internal framework function.
+	* Use From...() instead.
+	*/
 	template <typename T>
-	void Init(UDependencyContainer* Container);
+	void Init(UDependencyContainer* Container)
+	{
+		BindInfo = NewObject<UBindInfo>(this);
+		BindInfo->FromBindClass = T::StaticClass();
+		BindInfo->Container = Container;
+	}
 	
 	UToBinder* FromNew() const;
 
@@ -59,8 +66,15 @@ public:
 	UToBinder();
 	void Init(UBindInfo* bindInfo);
 	
+	/**
+ * @brief Use this function to select object of what class must be created.
+ * If you binding interface then your object class must implement this interface.
+ *
+ * @tparam T Created Object Class
+ */
 	template <typename T>
 	void To();
+	
 
 private:
 

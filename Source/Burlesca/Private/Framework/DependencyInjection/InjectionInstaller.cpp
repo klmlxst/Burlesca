@@ -17,3 +17,8 @@ void AInjectionInstaller::InstallBindings(UDependencyContainer* Container)
 {
 	
 }
+
+void AInjectionInstaller::Start(UDependencyContainer* Container)
+{
+	
+}

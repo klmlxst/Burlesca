@@ -4,6 +4,7 @@
 #include "MainCharacterComponents/Interaction/TP_MainCharInteractionController.h"
 #include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Framework/SignalBus.h"
 #include "InteractableObjects/Interactable.h"
 #include "MainCharacterComponents/Interaction/InteractionCaseController.h"
 
@@ -12,7 +13,7 @@ UTP_MainCharInteractionController::UTP_MainCharInteractionController()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UTP_MainCharInteractionController::Init(UCameraComponent* camera)
+void UTP_MainCharInteractionController::Init(UCameraComponent* camera, AGameplayHUD* hud, USignalBus* signalBus)
 {
 	MainCamera = camera;
 	check(MainCamera);
@@ -20,26 +21,54 @@ void UTP_MainCharInteractionController::Init(UCameraComponent* camera)
 	check(GetOwner());
 	Owner = GetOwner();
 
-	AGameplayHUD* HUD = Cast<AGameplayHUD>(Owner->GetWorld()->GetFirstPlayerController()->GetHUD());
-	check(HUD);
-
+	SignalBus = signalBus;
+	
 	InteractionController = NewObject<UInteractionCaseController>(this);
-	InteractionController->Init(HUD);
+	InteractionController->Init(hud);
+
+	SignalBus->GetCharacterEventsContainer()->OnCharacterCameraReturnedToCharacter.AddDynamic(this, &UTP_MainCharInteractionController::ResetCurrentInteractable);
 }
 
-void UTP_MainCharInteractionController::SetupInput(UInputComponent* input)
+void UTP_MainCharInteractionController::SetupInput(UEnhancedInputComponent* input)
 {
 	UEnhancedInputComponent* enhancedInputComponent = Cast<UEnhancedInputComponent>(input);	
 	check(enhancedInputComponent);
 	
-	enhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, InteractionController, &UInteractionCaseController::InteractionCalled);
+	enhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &UTP_MainCharInteractionController::PerformInteract);
+}
+
+void UTP_MainCharInteractionController::PerformInteract()
+{
+	if(!bIsServiceStoped)
+	{
+		InteractionController->InteractionCalled();	
+	}
+}
+
+void UTP_MainCharInteractionController::ResetCurrentInteractable()
+{
+	CurrentInteractable = nullptr;
+}
+
+
+void UTP_MainCharInteractionController::PlayService()
+{
+	bIsServiceStoped = false;
+}
+
+void UTP_MainCharInteractionController::StopService()
+{
+	bIsServiceStoped = true;
 }
 
 void UTP_MainCharInteractionController::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	PerformInteractableCheck();
+	if(!bIsServiceStoped)
+	{
+		PerformInteractableCheck();	
+	}
 }
 
 void UTP_MainCharInteractionController::PerformInteractableCheck()
@@ -71,13 +100,14 @@ void UTP_MainCharInteractionController::PerformInteractableCheck()
 		else
 		{
 			InteractionController->InteractableNotFound();
-			CurrentInteractable = nullptr;
+			ResetCurrentInteractable();
 		}
 	}
 
 	InteractionController->InteractableNotFound();
-	CurrentInteractable = nullptr;
+	ResetCurrentInteractable();
 }
+
 
 /*void UTP_MainCharInteractionController::BeginInteract()
 {

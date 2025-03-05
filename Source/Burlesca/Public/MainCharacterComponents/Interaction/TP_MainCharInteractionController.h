@@ -11,8 +11,7 @@
 class UInteractionCaseController;
 class IInteractable;
 class UCameraComponent;
-class UInputComponent;
-class UInputMappingContext;
+class UEnhancedInputComponent;
 class UInputAction;
 
 struct FHitResult;
@@ -25,8 +24,12 @@ class BURLESCA_API UTP_MainCharInteractionController : public UActorComponent
 
 public:	
 	UTP_MainCharInteractionController();
-	void Init(UCameraComponent* camera);
-	void SetupInput(UInputComponent* input);
+	void Init(UCameraComponent* camera, AGameplayHUD* hud, USignalBus* signalBus);
+	void SetupInput(UEnhancedInputComponent* input);
+	void PlayService();
+	void StopService();
+	
+	FORCEINLINE bool IsServiceStoped() const { return bIsServiceStoped; }
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -37,6 +40,9 @@ private:
 	UPROPERTY()
 	AActor* Owner;
 
+	UPROPERTY()
+	USignalBus* SignalBus;
+	
 	UPROPERTY()
 	AActor* CurrentInteractable;
 	
@@ -50,4 +56,10 @@ private:
 	UInteractionCaseController* InteractionController;
 	
 	void PerformInteractableCheck();
+	void PerformInteract();
+
+	UFUNCTION()
+	void ResetCurrentInteractable();
+	
+	bool bIsServiceStoped;
 };

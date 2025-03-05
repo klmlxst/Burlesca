@@ -13,4 +13,6 @@ class BURLESCA_API ABurlescaGameModeBase : public AGameModeBase
 
 public:
 	ABurlescaGameModeBase();
+	
+	virtual void StartPlay() override;
 };

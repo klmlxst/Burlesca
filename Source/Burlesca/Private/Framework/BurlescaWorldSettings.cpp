@@ -6,5 +6,6 @@
 
 UDependencyContainer* ABurlescaWorldSettings::GetDIContainer()
 {
+	check(SceneContext);
 	return SceneContext->GetDIContainer();
 }
