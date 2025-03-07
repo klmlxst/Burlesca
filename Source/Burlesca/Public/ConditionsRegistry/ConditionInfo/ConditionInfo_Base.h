@@ -11,7 +11,4 @@ class BURLESCA_API UConditionInfo_Base : public UObject
 
 public:
 	virtual FConditionParams GetConditionParams() { return FConditionParams(); }
-
-	UPROPERTY(EditAnywhere)
-	int SobakaDaNuNah = 0;
 };

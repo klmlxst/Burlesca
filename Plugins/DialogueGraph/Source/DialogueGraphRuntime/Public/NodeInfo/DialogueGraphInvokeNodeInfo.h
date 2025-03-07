@@ -19,10 +19,6 @@ class DIALOGUEGRAPHRUNTIME_API UDialogueGraphInvokeNodeInfo : public UDialogueGr
 	GENERATED_BODY()
 
 public:	
-	UPROPERTY(EditAnywhere)
-	EInvokeNodeEventContainer EventContainer;
-
-	UPROPERTY(EditAnywhere)
-	FName EventName;
+	
 };
 	
